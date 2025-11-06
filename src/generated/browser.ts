@@ -57,6 +57,11 @@ export type Station = Prisma.StationModel
  */
 export type StationGame = Prisma.StationGameModel
 /**
+ * Model StationPricing
+ * 
+ */
+export type StationPricing = Prisma.StationPricingModel
+/**
  * Model UserOrganization
  * 
  */

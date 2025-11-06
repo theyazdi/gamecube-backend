@@ -131,22 +131,27 @@ model Station {
   id             Int       @id @default(autoincrement())
   organizationId  Int
   title          String
-  price          Float
   consoleId      Int
   capacity       Int
   status         Boolean   @default(false)
   isActive       Boolean   @default(true)
   isAccepted     Boolean   @default(false)
+  deletedAt       DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   
   organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   console        Console       @relation(fields: [consoleId], references: [id], onDelete: Restrict)
   stationGames   StationGame[]
+  pricings       StationPricing[]
 
   @@map("stations")
   @@index([organizationId])
   @@index([consoleId])
+  @@index([deletedAt])
+  @@index([isAccepted, isActive, deletedAt])
+  @@index([consoleId, deletedAt])
+  @@index([organizationId, deletedAt])
 }
 
 model StationGame {
@@ -162,6 +167,24 @@ model StationGame {
   @@map("station_games")
   @@index([stationId])
   @@index([gameId])
+  @@index([gameId, stationId])
+}
+
+model StationPricing {
+  id         Int      @id @default(autoincrement())
+  stationId  Int
+  playerCount Int      // تعداد نفرات (1, 2, 3, ...)
+  price      Float     // قیمت برای این تعداد نفرات
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  station Station @relation(fields: [stationId], references: [id], onDelete: Cascade)
+
+  @@unique([stationId, playerCount])
+  @@map("station_pricings")
+  @@index([stationId])
+  @@index([playerCount])
+  @@index([stationId, playerCount])
 }
 
 model UserOrganization {

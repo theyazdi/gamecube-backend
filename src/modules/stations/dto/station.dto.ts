@@ -1,5 +1,28 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional, IsBoolean, IsArray, IsNumber, MinLength, IsNotEmpty } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsArray, IsNumber, MinLength, IsNotEmpty, ValidateNested, Min, Max, ArrayMinSize } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class StationPricingDto {
+  @ApiProperty({
+    description: 'Number of players for this pricing',
+    example: 1,
+    minimum: 1,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  @Min(1)
+  playerCount: number;
+
+  @ApiProperty({
+    description: 'Price per hour for this number of players',
+    example: 250000,
+    minimum: 0,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  @Min(0)
+  price: number;
+}
 
 export class CreateStationDto {
   @ApiProperty({
@@ -21,14 +44,6 @@ export class CreateStationDto {
   title: string;
 
   @ApiProperty({
-    description: 'Price per hour',
-    example: 50000,
-  })
-  @IsNumber()
-  @IsNotEmpty()
-  price: number;
-
-  @ApiProperty({
     description: 'Console ID',
     example: 1,
   })
@@ -37,12 +52,32 @@ export class CreateStationDto {
   consoleId: number;
 
   @ApiProperty({
-    description: 'Station capacity (number of people)',
-    example: 2,
+    description: 'Station capacity (maximum number of people)',
+    example: 6,
+    minimum: 1,
   })
   @IsNumber()
   @IsNotEmpty()
+  @Min(1)
   capacity: number;
+
+  @ApiProperty({
+    description: 'Pricing array - must have exactly one pricing per player count from 1 to capacity',
+    example: [
+      { playerCount: 1, price: 250000 },
+      { playerCount: 2, price: 350000 },
+      { playerCount: 3, price: 400000 },
+      { playerCount: 4, price: 450000 },
+      { playerCount: 5, price: 500000 },
+      { playerCount: 6, price: 550000 },
+    ],
+    type: [StationPricingDto],
+  })
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => StationPricingDto)
+  pricings: StationPricingDto[];
 
   @ApiPropertyOptional({
     description: 'Station status (in use or not)',
@@ -102,14 +137,6 @@ export class UpdateStationDto {
   title?: string;
 
   @ApiPropertyOptional({
-    description: 'Price per hour',
-    example: 50000,
-  })
-  @IsOptional()
-  @IsNumber()
-  price?: number;
-
-  @ApiPropertyOptional({
     description: 'Console ID',
     example: 1,
   })
@@ -118,12 +145,28 @@ export class UpdateStationDto {
   consoleId?: number;
 
   @ApiPropertyOptional({
-    description: 'Station capacity (number of people)',
-    example: 2,
+    description: 'Station capacity (maximum number of people)',
+    example: 6,
+    minimum: 1,
   })
   @IsOptional()
   @IsNumber()
+  @Min(1)
   capacity?: number;
+
+  @ApiPropertyOptional({
+    description: 'Pricing array - must have exactly one pricing per player count from 1 to capacity',
+    example: [
+      { playerCount: 1, price: 250000 },
+      { playerCount: 2, price: 350000 },
+    ],
+    type: [StationPricingDto],
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => StationPricingDto)
+  pricings?: StationPricingDto[];
 
   @ApiPropertyOptional({
     description: 'Station status (in use or not)',
@@ -160,6 +203,38 @@ export class UpdateStationDto {
   gameIds?: number[];
 }
 
+export class StationPricingResponseDto {
+  @ApiProperty({
+    description: 'Pricing ID',
+    example: 1,
+  })
+  id: number;
+
+  @ApiProperty({
+    description: 'Number of players',
+    example: 1,
+  })
+  playerCount: number;
+
+  @ApiProperty({
+    description: 'Price per hour',
+    example: 250000,
+  })
+  price: number;
+
+  @ApiProperty({
+    description: 'Creation timestamp',
+    example: '2024-01-01T00:00:00.000Z',
+  })
+  createdAt: Date;
+
+  @ApiProperty({
+    description: 'Last update timestamp',
+    example: '2024-01-01T00:00:00.000Z',
+  })
+  updatedAt: Date;
+}
+
 export class StationResponseDto {
   @ApiProperty({
     description: 'Station ID',
@@ -180,12 +255,6 @@ export class StationResponseDto {
   title: string;
 
   @ApiProperty({
-    description: 'Price per hour',
-    example: 50000,
-  })
-  price: number;
-
-  @ApiProperty({
     description: 'Console ID',
     example: 1,
   })
@@ -193,7 +262,7 @@ export class StationResponseDto {
 
   @ApiProperty({
     description: 'Station capacity',
-    example: 2,
+    example: 6,
   })
   capacity: number;
 
@@ -216,6 +285,12 @@ export class StationResponseDto {
   isAccepted: boolean;
 
   @ApiProperty({
+    description: 'Pricing array',
+    type: [StationPricingResponseDto],
+  })
+  pricings: StationPricingResponseDto[];
+
+  @ApiProperty({
     description: 'Creation timestamp',
     example: '2024-01-01T00:00:00.000Z',
   })
@@ -226,4 +301,54 @@ export class StationResponseDto {
     example: '2024-01-01T00:00:00.000Z',
   })
   updatedAt: Date;
+}
+
+export class SearchStationsDto {
+  @ApiPropertyOptional({
+    description: 'Number of players',
+    example: 2,
+    minimum: 1,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Type(() => Number)
+  playerCount?: number;
+
+  @ApiPropertyOptional({
+    description: 'Console ID',
+    example: 1,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  consoleId?: number;
+
+  @ApiPropertyOptional({
+    description: 'Game ID',
+    example: 1,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  gameId?: number;
+
+  @ApiPropertyOptional({
+    description: 'Organization ID',
+    example: 1,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  organizationId?: number;
+
+  @ApiPropertyOptional({
+    description: 'Only accepted and active stations',
+    example: true,
+    default: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  @Type(() => Boolean)
+  accepted?: boolean;
 }

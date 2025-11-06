@@ -28,7 +28,6 @@ export type AggregateStation = {
 export type StationAvgAggregateOutputType = {
   id: number | null
   organizationId: number | null
-  price: number | null
   consoleId: number | null
   capacity: number | null
 }
@@ -36,7 +35,6 @@ export type StationAvgAggregateOutputType = {
 export type StationSumAggregateOutputType = {
   id: number | null
   organizationId: number | null
-  price: number | null
   consoleId: number | null
   capacity: number | null
 }
@@ -45,12 +43,12 @@ export type StationMinAggregateOutputType = {
   id: number | null
   organizationId: number | null
   title: string | null
-  price: number | null
   consoleId: number | null
   capacity: number | null
   status: boolean | null
   isActive: boolean | null
   isAccepted: boolean | null
+  deletedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -59,12 +57,12 @@ export type StationMaxAggregateOutputType = {
   id: number | null
   organizationId: number | null
   title: string | null
-  price: number | null
   consoleId: number | null
   capacity: number | null
   status: boolean | null
   isActive: boolean | null
   isAccepted: boolean | null
+  deletedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -73,12 +71,12 @@ export type StationCountAggregateOutputType = {
   id: number
   organizationId: number
   title: number
-  price: number
   consoleId: number
   capacity: number
   status: number
   isActive: number
   isAccepted: number
+  deletedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -88,7 +86,6 @@ export type StationCountAggregateOutputType = {
 export type StationAvgAggregateInputType = {
   id?: true
   organizationId?: true
-  price?: true
   consoleId?: true
   capacity?: true
 }
@@ -96,7 +93,6 @@ export type StationAvgAggregateInputType = {
 export type StationSumAggregateInputType = {
   id?: true
   organizationId?: true
-  price?: true
   consoleId?: true
   capacity?: true
 }
@@ -105,12 +101,12 @@ export type StationMinAggregateInputType = {
   id?: true
   organizationId?: true
   title?: true
-  price?: true
   consoleId?: true
   capacity?: true
   status?: true
   isActive?: true
   isAccepted?: true
+  deletedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -119,12 +115,12 @@ export type StationMaxAggregateInputType = {
   id?: true
   organizationId?: true
   title?: true
-  price?: true
   consoleId?: true
   capacity?: true
   status?: true
   isActive?: true
   isAccepted?: true
+  deletedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -133,12 +129,12 @@ export type StationCountAggregateInputType = {
   id?: true
   organizationId?: true
   title?: true
-  price?: true
   consoleId?: true
   capacity?: true
   status?: true
   isActive?: true
   isAccepted?: true
+  deletedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -234,12 +230,12 @@ export type StationGroupByOutputType = {
   id: number
   organizationId: number
   title: string
-  price: number
   consoleId: number
   capacity: number
   status: boolean
   isActive: boolean
   isAccepted: boolean
+  deletedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: StationCountAggregateOutputType | null
@@ -271,34 +267,36 @@ export type StationWhereInput = {
   id?: Prisma.IntFilter<"Station"> | number
   organizationId?: Prisma.IntFilter<"Station"> | number
   title?: Prisma.StringFilter<"Station"> | string
-  price?: Prisma.FloatFilter<"Station"> | number
   consoleId?: Prisma.IntFilter<"Station"> | number
   capacity?: Prisma.IntFilter<"Station"> | number
   status?: Prisma.BoolFilter<"Station"> | boolean
   isActive?: Prisma.BoolFilter<"Station"> | boolean
   isAccepted?: Prisma.BoolFilter<"Station"> | boolean
+  deletedAt?: Prisma.DateTimeNullableFilter<"Station"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Station"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Station"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   console?: Prisma.XOR<Prisma.ConsoleScalarRelationFilter, Prisma.ConsoleWhereInput>
   stationGames?: Prisma.StationGameListRelationFilter
+  pricings?: Prisma.StationPricingListRelationFilter
 }
 
 export type StationOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  price?: Prisma.SortOrder
   consoleId?: Prisma.SortOrder
   capacity?: Prisma.SortOrder
   status?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isAccepted?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
   console?: Prisma.ConsoleOrderByWithRelationInput
   stationGames?: Prisma.StationGameOrderByRelationAggregateInput
+  pricings?: Prisma.StationPricingOrderByRelationAggregateInput
 }
 
 export type StationWhereUniqueInput = Prisma.AtLeast<{
@@ -308,29 +306,30 @@ export type StationWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.StationWhereInput | Prisma.StationWhereInput[]
   organizationId?: Prisma.IntFilter<"Station"> | number
   title?: Prisma.StringFilter<"Station"> | string
-  price?: Prisma.FloatFilter<"Station"> | number
   consoleId?: Prisma.IntFilter<"Station"> | number
   capacity?: Prisma.IntFilter<"Station"> | number
   status?: Prisma.BoolFilter<"Station"> | boolean
   isActive?: Prisma.BoolFilter<"Station"> | boolean
   isAccepted?: Prisma.BoolFilter<"Station"> | boolean
+  deletedAt?: Prisma.DateTimeNullableFilter<"Station"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Station"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Station"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   console?: Prisma.XOR<Prisma.ConsoleScalarRelationFilter, Prisma.ConsoleWhereInput>
   stationGames?: Prisma.StationGameListRelationFilter
+  pricings?: Prisma.StationPricingListRelationFilter
 }, "id">
 
 export type StationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  price?: Prisma.SortOrder
   consoleId?: Prisma.SortOrder
   capacity?: Prisma.SortOrder
   status?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isAccepted?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.StationCountOrderByAggregateInput
@@ -347,95 +346,99 @@ export type StationScalarWhereWithAggregatesInput = {
   id?: Prisma.IntWithAggregatesFilter<"Station"> | number
   organizationId?: Prisma.IntWithAggregatesFilter<"Station"> | number
   title?: Prisma.StringWithAggregatesFilter<"Station"> | string
-  price?: Prisma.FloatWithAggregatesFilter<"Station"> | number
   consoleId?: Prisma.IntWithAggregatesFilter<"Station"> | number
   capacity?: Prisma.IntWithAggregatesFilter<"Station"> | number
   status?: Prisma.BoolWithAggregatesFilter<"Station"> | boolean
   isActive?: Prisma.BoolWithAggregatesFilter<"Station"> | boolean
   isAccepted?: Prisma.BoolWithAggregatesFilter<"Station"> | boolean
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Station"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Station"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Station"> | Date | string
 }
 
 export type StationCreateInput = {
   title: string
-  price: number
   capacity: number
   status?: boolean
   isActive?: boolean
   isAccepted?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutStationsInput
   console: Prisma.ConsoleCreateNestedOneWithoutStationsInput
   stationGames?: Prisma.StationGameCreateNestedManyWithoutStationInput
+  pricings?: Prisma.StationPricingCreateNestedManyWithoutStationInput
 }
 
 export type StationUncheckedCreateInput = {
   id?: number
   organizationId: number
   title: string
-  price: number
   consoleId: number
   capacity: number
   status?: boolean
   isActive?: boolean
   isAccepted?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   stationGames?: Prisma.StationGameUncheckedCreateNestedManyWithoutStationInput
+  pricings?: Prisma.StationPricingUncheckedCreateNestedManyWithoutStationInput
 }
 
 export type StationUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  price?: Prisma.FloatFieldUpdateOperationsInput | number
   capacity?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutStationsNestedInput
   console?: Prisma.ConsoleUpdateOneRequiredWithoutStationsNestedInput
   stationGames?: Prisma.StationGameUpdateManyWithoutStationNestedInput
+  pricings?: Prisma.StationPricingUpdateManyWithoutStationNestedInput
 }
 
 export type StationUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   organizationId?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  price?: Prisma.FloatFieldUpdateOperationsInput | number
   consoleId?: Prisma.IntFieldUpdateOperationsInput | number
   capacity?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stationGames?: Prisma.StationGameUncheckedUpdateManyWithoutStationNestedInput
+  pricings?: Prisma.StationPricingUncheckedUpdateManyWithoutStationNestedInput
 }
 
 export type StationCreateManyInput = {
   id?: number
   organizationId: number
   title: string
-  price: number
   consoleId: number
   capacity: number
   status?: boolean
   isActive?: boolean
   isAccepted?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type StationUpdateManyMutationInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  price?: Prisma.FloatFieldUpdateOperationsInput | number
   capacity?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -444,12 +447,12 @@ export type StationUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   organizationId?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  price?: Prisma.FloatFieldUpdateOperationsInput | number
   consoleId?: Prisma.IntFieldUpdateOperationsInput | number
   capacity?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -468,12 +471,12 @@ export type StationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  price?: Prisma.SortOrder
   consoleId?: Prisma.SortOrder
   capacity?: Prisma.SortOrder
   status?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isAccepted?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -481,7 +484,6 @@ export type StationCountOrderByAggregateInput = {
 export type StationAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
-  price?: Prisma.SortOrder
   consoleId?: Prisma.SortOrder
   capacity?: Prisma.SortOrder
 }
@@ -490,12 +492,12 @@ export type StationMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  price?: Prisma.SortOrder
   consoleId?: Prisma.SortOrder
   capacity?: Prisma.SortOrder
   status?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isAccepted?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -504,12 +506,12 @@ export type StationMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  price?: Prisma.SortOrder
   consoleId?: Prisma.SortOrder
   capacity?: Prisma.SortOrder
   status?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isAccepted?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -517,7 +519,6 @@ export type StationMinOrderByAggregateInput = {
 export type StationSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
-  price?: Prisma.SortOrder
   consoleId?: Prisma.SortOrder
   capacity?: Prisma.SortOrder
 }
@@ -611,14 +612,6 @@ export type StationUncheckedUpdateManyWithoutConsoleNestedInput = {
   deleteMany?: Prisma.StationScalarWhereInput | Prisma.StationScalarWhereInput[]
 }
 
-export type FloatFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type StationCreateNestedOneWithoutStationGamesInput = {
   create?: Prisma.XOR<Prisma.StationCreateWithoutStationGamesInput, Prisma.StationUncheckedCreateWithoutStationGamesInput>
   connectOrCreate?: Prisma.StationCreateOrConnectWithoutStationGamesInput
@@ -633,31 +626,47 @@ export type StationUpdateOneRequiredWithoutStationGamesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.StationUpdateToOneWithWhereWithoutStationGamesInput, Prisma.StationUpdateWithoutStationGamesInput>, Prisma.StationUncheckedUpdateWithoutStationGamesInput>
 }
 
+export type StationCreateNestedOneWithoutPricingsInput = {
+  create?: Prisma.XOR<Prisma.StationCreateWithoutPricingsInput, Prisma.StationUncheckedCreateWithoutPricingsInput>
+  connectOrCreate?: Prisma.StationCreateOrConnectWithoutPricingsInput
+  connect?: Prisma.StationWhereUniqueInput
+}
+
+export type StationUpdateOneRequiredWithoutPricingsNestedInput = {
+  create?: Prisma.XOR<Prisma.StationCreateWithoutPricingsInput, Prisma.StationUncheckedCreateWithoutPricingsInput>
+  connectOrCreate?: Prisma.StationCreateOrConnectWithoutPricingsInput
+  upsert?: Prisma.StationUpsertWithoutPricingsInput
+  connect?: Prisma.StationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.StationUpdateToOneWithWhereWithoutPricingsInput, Prisma.StationUpdateWithoutPricingsInput>, Prisma.StationUncheckedUpdateWithoutPricingsInput>
+}
+
 export type StationCreateWithoutOrganizationInput = {
   title: string
-  price: number
   capacity: number
   status?: boolean
   isActive?: boolean
   isAccepted?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   console: Prisma.ConsoleCreateNestedOneWithoutStationsInput
   stationGames?: Prisma.StationGameCreateNestedManyWithoutStationInput
+  pricings?: Prisma.StationPricingCreateNestedManyWithoutStationInput
 }
 
 export type StationUncheckedCreateWithoutOrganizationInput = {
   id?: number
   title: string
-  price: number
   consoleId: number
   capacity: number
   status?: boolean
   isActive?: boolean
   isAccepted?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   stationGames?: Prisma.StationGameUncheckedCreateNestedManyWithoutStationInput
+  pricings?: Prisma.StationPricingUncheckedCreateNestedManyWithoutStationInput
 }
 
 export type StationCreateOrConnectWithoutOrganizationInput = {
@@ -693,41 +702,43 @@ export type StationScalarWhereInput = {
   id?: Prisma.IntFilter<"Station"> | number
   organizationId?: Prisma.IntFilter<"Station"> | number
   title?: Prisma.StringFilter<"Station"> | string
-  price?: Prisma.FloatFilter<"Station"> | number
   consoleId?: Prisma.IntFilter<"Station"> | number
   capacity?: Prisma.IntFilter<"Station"> | number
   status?: Prisma.BoolFilter<"Station"> | boolean
   isActive?: Prisma.BoolFilter<"Station"> | boolean
   isAccepted?: Prisma.BoolFilter<"Station"> | boolean
+  deletedAt?: Prisma.DateTimeNullableFilter<"Station"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Station"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Station"> | Date | string
 }
 
 export type StationCreateWithoutConsoleInput = {
   title: string
-  price: number
   capacity: number
   status?: boolean
   isActive?: boolean
   isAccepted?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutStationsInput
   stationGames?: Prisma.StationGameCreateNestedManyWithoutStationInput
+  pricings?: Prisma.StationPricingCreateNestedManyWithoutStationInput
 }
 
 export type StationUncheckedCreateWithoutConsoleInput = {
   id?: number
   organizationId: number
   title: string
-  price: number
   capacity: number
   status?: boolean
   isActive?: boolean
   isAccepted?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   stationGames?: Prisma.StationGameUncheckedCreateNestedManyWithoutStationInput
+  pricings?: Prisma.StationPricingUncheckedCreateNestedManyWithoutStationInput
 }
 
 export type StationCreateOrConnectWithoutConsoleInput = {
@@ -758,29 +769,31 @@ export type StationUpdateManyWithWhereWithoutConsoleInput = {
 
 export type StationCreateWithoutStationGamesInput = {
   title: string
-  price: number
   capacity: number
   status?: boolean
   isActive?: boolean
   isAccepted?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutStationsInput
   console: Prisma.ConsoleCreateNestedOneWithoutStationsInput
+  pricings?: Prisma.StationPricingCreateNestedManyWithoutStationInput
 }
 
 export type StationUncheckedCreateWithoutStationGamesInput = {
   id?: number
   organizationId: number
   title: string
-  price: number
   consoleId: number
   capacity: number
   status?: boolean
   isActive?: boolean
   isAccepted?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  pricings?: Prisma.StationPricingUncheckedCreateNestedManyWithoutStationInput
 }
 
 export type StationCreateOrConnectWithoutStationGamesInput = {
@@ -801,80 +814,158 @@ export type StationUpdateToOneWithWhereWithoutStationGamesInput = {
 
 export type StationUpdateWithoutStationGamesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  price?: Prisma.FloatFieldUpdateOperationsInput | number
   capacity?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutStationsNestedInput
   console?: Prisma.ConsoleUpdateOneRequiredWithoutStationsNestedInput
+  pricings?: Prisma.StationPricingUpdateManyWithoutStationNestedInput
 }
 
 export type StationUncheckedUpdateWithoutStationGamesInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   organizationId?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  price?: Prisma.FloatFieldUpdateOperationsInput | number
   consoleId?: Prisma.IntFieldUpdateOperationsInput | number
   capacity?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  pricings?: Prisma.StationPricingUncheckedUpdateManyWithoutStationNestedInput
 }
 
-export type StationCreateManyOrganizationInput = {
-  id?: number
+export type StationCreateWithoutPricingsInput = {
   title: string
-  price: number
+  capacity: number
+  status?: boolean
+  isActive?: boolean
+  isAccepted?: boolean
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutStationsInput
+  console: Prisma.ConsoleCreateNestedOneWithoutStationsInput
+  stationGames?: Prisma.StationGameCreateNestedManyWithoutStationInput
+}
+
+export type StationUncheckedCreateWithoutPricingsInput = {
+  id?: number
+  organizationId: number
+  title: string
   consoleId: number
   capacity: number
   status?: boolean
   isActive?: boolean
   isAccepted?: boolean
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  stationGames?: Prisma.StationGameUncheckedCreateNestedManyWithoutStationInput
+}
+
+export type StationCreateOrConnectWithoutPricingsInput = {
+  where: Prisma.StationWhereUniqueInput
+  create: Prisma.XOR<Prisma.StationCreateWithoutPricingsInput, Prisma.StationUncheckedCreateWithoutPricingsInput>
+}
+
+export type StationUpsertWithoutPricingsInput = {
+  update: Prisma.XOR<Prisma.StationUpdateWithoutPricingsInput, Prisma.StationUncheckedUpdateWithoutPricingsInput>
+  create: Prisma.XOR<Prisma.StationCreateWithoutPricingsInput, Prisma.StationUncheckedCreateWithoutPricingsInput>
+  where?: Prisma.StationWhereInput
+}
+
+export type StationUpdateToOneWithWhereWithoutPricingsInput = {
+  where?: Prisma.StationWhereInput
+  data: Prisma.XOR<Prisma.StationUpdateWithoutPricingsInput, Prisma.StationUncheckedUpdateWithoutPricingsInput>
+}
+
+export type StationUpdateWithoutPricingsInput = {
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  capacity?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutStationsNestedInput
+  console?: Prisma.ConsoleUpdateOneRequiredWithoutStationsNestedInput
+  stationGames?: Prisma.StationGameUpdateManyWithoutStationNestedInput
+}
+
+export type StationUncheckedUpdateWithoutPricingsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  organizationId?: Prisma.IntFieldUpdateOperationsInput | number
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  consoleId?: Prisma.IntFieldUpdateOperationsInput | number
+  capacity?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  stationGames?: Prisma.StationGameUncheckedUpdateManyWithoutStationNestedInput
+}
+
+export type StationCreateManyOrganizationInput = {
+  id?: number
+  title: string
+  consoleId: number
+  capacity: number
+  status?: boolean
+  isActive?: boolean
+  isAccepted?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type StationUpdateWithoutOrganizationInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  price?: Prisma.FloatFieldUpdateOperationsInput | number
   capacity?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   console?: Prisma.ConsoleUpdateOneRequiredWithoutStationsNestedInput
   stationGames?: Prisma.StationGameUpdateManyWithoutStationNestedInput
+  pricings?: Prisma.StationPricingUpdateManyWithoutStationNestedInput
 }
 
 export type StationUncheckedUpdateWithoutOrganizationInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  price?: Prisma.FloatFieldUpdateOperationsInput | number
   consoleId?: Prisma.IntFieldUpdateOperationsInput | number
   capacity?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stationGames?: Prisma.StationGameUncheckedUpdateManyWithoutStationNestedInput
+  pricings?: Prisma.StationPricingUncheckedUpdateManyWithoutStationNestedInput
 }
 
 export type StationUncheckedUpdateManyWithoutOrganizationInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  price?: Prisma.FloatFieldUpdateOperationsInput | number
   consoleId?: Prisma.IntFieldUpdateOperationsInput | number
   capacity?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -883,51 +974,53 @@ export type StationCreateManyConsoleInput = {
   id?: number
   organizationId: number
   title: string
-  price: number
   capacity: number
   status?: boolean
   isActive?: boolean
   isAccepted?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type StationUpdateWithoutConsoleInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  price?: Prisma.FloatFieldUpdateOperationsInput | number
   capacity?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutStationsNestedInput
   stationGames?: Prisma.StationGameUpdateManyWithoutStationNestedInput
+  pricings?: Prisma.StationPricingUpdateManyWithoutStationNestedInput
 }
 
 export type StationUncheckedUpdateWithoutConsoleInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   organizationId?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  price?: Prisma.FloatFieldUpdateOperationsInput | number
   capacity?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stationGames?: Prisma.StationGameUncheckedUpdateManyWithoutStationNestedInput
+  pricings?: Prisma.StationPricingUncheckedUpdateManyWithoutStationNestedInput
 }
 
 export type StationUncheckedUpdateManyWithoutConsoleInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   organizationId?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  price?: Prisma.FloatFieldUpdateOperationsInput | number
   capacity?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -939,10 +1032,12 @@ export type StationUncheckedUpdateManyWithoutConsoleInput = {
 
 export type StationCountOutputType = {
   stationGames: number
+  pricings: number
 }
 
 export type StationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   stationGames?: boolean | StationCountOutputTypeCountStationGamesArgs
+  pricings?: boolean | StationCountOutputTypeCountPricingsArgs
 }
 
 /**
@@ -962,22 +1057,30 @@ export type StationCountOutputTypeCountStationGamesArgs<ExtArgs extends runtime.
   where?: Prisma.StationGameWhereInput
 }
 
+/**
+ * StationCountOutputType without action
+ */
+export type StationCountOutputTypeCountPricingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StationPricingWhereInput
+}
+
 
 export type StationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   organizationId?: boolean
   title?: boolean
-  price?: boolean
   consoleId?: boolean
   capacity?: boolean
   status?: boolean
   isActive?: boolean
   isAccepted?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   console?: boolean | Prisma.ConsoleDefaultArgs<ExtArgs>
   stationGames?: boolean | Prisma.Station$stationGamesArgs<ExtArgs>
+  pricings?: boolean | Prisma.Station$pricingsArgs<ExtArgs>
   _count?: boolean | Prisma.StationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["station"]>
 
@@ -985,12 +1088,12 @@ export type StationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   id?: boolean
   organizationId?: boolean
   title?: boolean
-  price?: boolean
   consoleId?: boolean
   capacity?: boolean
   status?: boolean
   isActive?: boolean
   isAccepted?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1001,12 +1104,12 @@ export type StationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   id?: boolean
   organizationId?: boolean
   title?: boolean
-  price?: boolean
   consoleId?: boolean
   capacity?: boolean
   status?: boolean
   isActive?: boolean
   isAccepted?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1017,21 +1120,22 @@ export type StationSelectScalar = {
   id?: boolean
   organizationId?: boolean
   title?: boolean
-  price?: boolean
   consoleId?: boolean
   capacity?: boolean
   status?: boolean
   isActive?: boolean
   isAccepted?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type StationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "title" | "price" | "consoleId" | "capacity" | "status" | "isActive" | "isAccepted" | "createdAt" | "updatedAt", ExtArgs["result"]["station"]>
+export type StationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "title" | "consoleId" | "capacity" | "status" | "isActive" | "isAccepted" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["station"]>
 export type StationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   console?: boolean | Prisma.ConsoleDefaultArgs<ExtArgs>
   stationGames?: boolean | Prisma.Station$stationGamesArgs<ExtArgs>
+  pricings?: boolean | Prisma.Station$pricingsArgs<ExtArgs>
   _count?: boolean | Prisma.StationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type StationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1049,17 +1153,18 @@ export type $StationPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     organization: Prisma.$OrganizationPayload<ExtArgs>
     console: Prisma.$ConsolePayload<ExtArgs>
     stationGames: Prisma.$StationGamePayload<ExtArgs>[]
+    pricings: Prisma.$StationPricingPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
     organizationId: number
     title: string
-    price: number
     consoleId: number
     capacity: number
     status: boolean
     isActive: boolean
     isAccepted: boolean
+    deletedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["station"]>
@@ -1459,6 +1564,7 @@ export interface Prisma__StationClient<T, Null = never, ExtArgs extends runtime.
   organization<T extends Prisma.OrganizationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrganizationDefaultArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   console<T extends Prisma.ConsoleDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ConsoleDefaultArgs<ExtArgs>>): Prisma.Prisma__ConsoleClient<runtime.Types.Result.GetResult<Prisma.$ConsolePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   stationGames<T extends Prisma.Station$stationGamesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Station$stationGamesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StationGamePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  pricings<T extends Prisma.Station$pricingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Station$pricingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StationPricingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1491,12 +1597,12 @@ export interface StationFieldRefs {
   readonly id: Prisma.FieldRef<"Station", 'Int'>
   readonly organizationId: Prisma.FieldRef<"Station", 'Int'>
   readonly title: Prisma.FieldRef<"Station", 'String'>
-  readonly price: Prisma.FieldRef<"Station", 'Float'>
   readonly consoleId: Prisma.FieldRef<"Station", 'Int'>
   readonly capacity: Prisma.FieldRef<"Station", 'Int'>
   readonly status: Prisma.FieldRef<"Station", 'Boolean'>
   readonly isActive: Prisma.FieldRef<"Station", 'Boolean'>
   readonly isAccepted: Prisma.FieldRef<"Station", 'Boolean'>
+  readonly deletedAt: Prisma.FieldRef<"Station", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Station", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Station", 'DateTime'>
 }
@@ -1916,6 +2022,30 @@ export type Station$stationGamesArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.StationGameScalarFieldEnum | Prisma.StationGameScalarFieldEnum[]
+}
+
+/**
+ * Station.pricings
+ */
+export type Station$pricingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StationPricing
+   */
+  select?: Prisma.StationPricingSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StationPricing
+   */
+  omit?: Prisma.StationPricingOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StationPricingInclude<ExtArgs> | null
+  where?: Prisma.StationPricingWhereInput
+  orderBy?: Prisma.StationPricingOrderByWithRelationInput | Prisma.StationPricingOrderByWithRelationInput[]
+  cursor?: Prisma.StationPricingWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StationPricingScalarFieldEnum | Prisma.StationPricingScalarFieldEnum[]
 }
 
 /**

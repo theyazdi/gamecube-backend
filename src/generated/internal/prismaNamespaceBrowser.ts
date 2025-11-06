@@ -56,6 +56,7 @@ export const ModelName = {
   Console: 'Console',
   Station: 'Station',
   StationGame: 'StationGame',
+  StationPricing: 'StationPricing',
   UserOrganization: 'UserOrganization'
 } as const
 
@@ -178,12 +179,12 @@ export const StationScalarFieldEnum = {
   id: 'id',
   organizationId: 'organizationId',
   title: 'title',
-  price: 'price',
   consoleId: 'consoleId',
   capacity: 'capacity',
   status: 'status',
   isActive: 'isActive',
   isAccepted: 'isAccepted',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -199,6 +200,18 @@ export const StationGameScalarFieldEnum = {
 } as const
 
 export type StationGameScalarFieldEnum = (typeof StationGameScalarFieldEnum)[keyof typeof StationGameScalarFieldEnum]
+
+
+export const StationPricingScalarFieldEnum = {
+  id: 'id',
+  stationId: 'stationId',
+  playerCount: 'playerCount',
+  price: 'price',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StationPricingScalarFieldEnum = (typeof StationPricingScalarFieldEnum)[keyof typeof StationPricingScalarFieldEnum]
 
 
 export const UserOrganizationScalarFieldEnum = {

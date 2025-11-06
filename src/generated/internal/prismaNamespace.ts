@@ -397,6 +397,7 @@ export const ModelName = {
   Console: 'Console',
   Station: 'Station',
   StationGame: 'StationGame',
+  StationPricing: 'StationPricing',
   UserOrganization: 'UserOrganization'
 } as const
 
@@ -413,7 +414,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "profile" | "otpCode" | "organization" | "game" | "console" | "station" | "stationGame" | "userOrganization"
+    modelProps: "user" | "profile" | "otpCode" | "organization" | "game" | "console" | "station" | "stationGame" | "stationPricing" | "userOrganization"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1009,6 +1010,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    StationPricing: {
+      payload: Prisma.$StationPricingPayload<ExtArgs>
+      fields: Prisma.StationPricingFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.StationPricingFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StationPricingPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.StationPricingFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StationPricingPayload>
+        }
+        findFirst: {
+          args: Prisma.StationPricingFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StationPricingPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.StationPricingFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StationPricingPayload>
+        }
+        findMany: {
+          args: Prisma.StationPricingFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StationPricingPayload>[]
+        }
+        create: {
+          args: Prisma.StationPricingCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StationPricingPayload>
+        }
+        createMany: {
+          args: Prisma.StationPricingCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.StationPricingCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StationPricingPayload>[]
+        }
+        delete: {
+          args: Prisma.StationPricingDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StationPricingPayload>
+        }
+        update: {
+          args: Prisma.StationPricingUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StationPricingPayload>
+        }
+        deleteMany: {
+          args: Prisma.StationPricingDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.StationPricingUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.StationPricingUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StationPricingPayload>[]
+        }
+        upsert: {
+          args: Prisma.StationPricingUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StationPricingPayload>
+        }
+        aggregate: {
+          args: Prisma.StationPricingAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateStationPricing>
+        }
+        groupBy: {
+          args: Prisma.StationPricingGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StationPricingGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.StationPricingCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StationPricingCountAggregateOutputType> | number
+        }
+      }
+    }
     UserOrganization: {
       payload: Prisma.$UserOrganizationPayload<ExtArgs>
       fields: Prisma.UserOrganizationFieldRefs
@@ -1225,12 +1300,12 @@ export const StationScalarFieldEnum = {
   id: 'id',
   organizationId: 'organizationId',
   title: 'title',
-  price: 'price',
   consoleId: 'consoleId',
   capacity: 'capacity',
   status: 'status',
   isActive: 'isActive',
   isAccepted: 'isAccepted',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1246,6 +1321,18 @@ export const StationGameScalarFieldEnum = {
 } as const
 
 export type StationGameScalarFieldEnum = (typeof StationGameScalarFieldEnum)[keyof typeof StationGameScalarFieldEnum]
+
+
+export const StationPricingScalarFieldEnum = {
+  id: 'id',
+  stationId: 'stationId',
+  playerCount: 'playerCount',
+  price: 'price',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StationPricingScalarFieldEnum = (typeof StationPricingScalarFieldEnum)[keyof typeof StationPricingScalarFieldEnum]
 
 
 export const UserOrganizationScalarFieldEnum = {
@@ -1460,6 +1547,7 @@ export type GlobalOmitConfig = {
   console?: Prisma.ConsoleOmit
   station?: Prisma.StationOmit
   stationGame?: Prisma.StationGameOmit
+  stationPricing?: Prisma.StationPricingOmit
   userOrganization?: Prisma.UserOrganizationOmit
 }
 

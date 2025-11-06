@@ -27,7 +27,7 @@ import {
 } from '@nestjs/swagger';
 import { StationService } from './station.service';
 import { Station } from '../../generated/client';
-import { CreateStationDto, UpdateStationDto, StationResponseDto } from './dto/station.dto';
+import { CreateStationDto, UpdateStationDto, StationResponseDto, SearchStationsDto } from './dto/station.dto';
 import { JwtAuthGuard, RolesGuard, Roles, UserRole } from '../../shared';
 
 @ApiTags('stations')
@@ -100,6 +100,79 @@ export class StationController {
     return this.stationService.findAllStations();
   }
 
+  @Get('search')
+  @Roles(UserRole.USER, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Search stations with filters',
+    description: 'Search stations by playerCount, consoleId, gameId, organizationId. Optimized for performance with proper indexes.',
+  })
+  @ApiQuery({
+    name: 'playerCount',
+    required: false,
+    description: 'Number of players',
+    type: Number,
+    example: 2,
+  })
+  @ApiQuery({
+    name: 'consoleId',
+    required: false,
+    description: 'Console ID',
+    type: Number,
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'gameId',
+    required: false,
+    description: 'Game ID',
+    type: Number,
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'organizationId',
+    required: false,
+    description: 'Organization ID',
+    type: Number,
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'accepted',
+    required: false,
+    description: 'Only accepted and active stations',
+    type: Boolean,
+    example: true,
+  })
+  @ApiOkResponse({
+    description: 'Stations found successfully',
+    type: [StationResponseDto],
+  })
+  async searchStations(
+    @Query('playerCount') playerCount?: string,
+    @Query('consoleId') consoleId?: string,
+    @Query('gameId') gameId?: string,
+    @Query('organizationId') organizationId?: string,
+    @Query('accepted') accepted?: string,
+  ): Promise<Station[]> {
+    const filters: SearchStationsDto = {};
+    
+    if (playerCount) {
+      filters.playerCount = parseInt(playerCount, 10);
+    }
+    if (consoleId) {
+      filters.consoleId = parseInt(consoleId, 10);
+    }
+    if (gameId) {
+      filters.gameId = parseInt(gameId, 10);
+    }
+    if (organizationId) {
+      filters.organizationId = parseInt(organizationId, 10);
+    }
+    if (accepted !== undefined) {
+      filters.accepted = accepted === 'true';
+    }
+
+    return this.stationService.searchStations(filters);
+  }
+
   @Get(':id')
   @Roles(UserRole.USER, UserRole.SUPER_ADMIN)
   @ApiOperation({
@@ -156,7 +229,7 @@ export class StationController {
   @Roles(UserRole.SUPER_ADMIN)
   @ApiOperation({
     summary: 'Delete station by ID',
-    description: 'Permanently deletes a station by their ID',
+    description: 'Soft deletes a station by their ID (sets deletedAt timestamp)',
   })
   @ApiParam({
     name: 'id',
