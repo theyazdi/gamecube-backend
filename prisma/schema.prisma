@@ -1,0 +1,182 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://gcdbuser:13784652r@localhost:5432/newgamecube?schema=public"
+}
+
+model User {
+  id              Int      @id @default(autoincrement())
+  uuid            String   @unique @default(uuid())
+  phone           String   @unique
+  roles           String[] @default(["user"])
+  password        String
+  isPhoneVerified Boolean  @default(false)
+  isEmailVerified Boolean  @default(false)
+  isVerified      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  profile         Profile?
+  managedOrganizations UserOrganization[]
+
+  @@map("users")
+  @@index([phone]) // Additional index for faster phone lookups
+}
+
+model Profile {
+  id           Int     @id @default(autoincrement())
+  userId       Int     @unique
+  fName        String?
+  lName        String?
+  email        String?
+  nationalCode String?
+  province     String?
+  city         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model OtpCode {
+  id        Int      @id @default(autoincrement())
+  phone     String
+  code      String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@map("otp_codes")
+  @@index([phone])
+  @@index([expiresAt])
+}
+
+model Organization {
+  id            Int       @id @default(autoincrement())
+  uuid          String    @unique @default(uuid())
+  name          String
+  province      String
+  city          String
+  phoneNumber   String
+  email         String?
+  managerPhones String[]
+  gallery       String[]
+  indexImage    String?
+  logoImage     String?
+  address       String?
+  latitude      Decimal?
+  longitude     Decimal?
+  tfHour        Boolean   @default(false)
+  isCube        Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  stations      Station[]
+  managers      UserOrganization[]
+
+  @@map("organizations")
+  @@index([uuid])
+  @@index([province])
+  @@index([city])
+  @@index([latitude, longitude])
+}
+
+model Game {
+  id              Int       @id @default(autoincrement())
+  title           String
+  description     String?
+  coverImage      String?
+  category        String[]
+  releaseYear     Int
+  displayPriority Int       @default(0)
+  isAccepted      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  consoles     Console[]
+  stations     StationGame[]
+
+  @@map("games")
+  @@index([isAccepted])
+  @@index([displayPriority])
+}
+
+model Console {
+  id              Int       @id @default(autoincrement())
+  name            String    @unique
+  manufacturer    String?
+  releaseYear     Int
+  category        String
+  displayPriority Int       @default(0)
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  games    Game[]
+  stations Station[]
+
+  @@map("consoles")
+  @@index([category])
+  @@index([displayPriority])
+  @@index([deletedAt])
+}
+
+model Station {
+  id             Int       @id @default(autoincrement())
+  organizationId  Int
+  title          String
+  price          Float
+  consoleId      Int
+  capacity       Int
+  status         Boolean   @default(false)
+  isActive       Boolean   @default(true)
+  isAccepted     Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  console        Console       @relation(fields: [consoleId], references: [id], onDelete: Restrict)
+  stationGames   StationGame[]
+
+  @@map("stations")
+  @@index([organizationId])
+  @@index([consoleId])
+}
+
+model StationGame {
+  id        Int      @id @default(autoincrement())
+  stationId Int
+  gameId    Int
+  createdAt DateTime @default(now())
+
+  station Station @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  game    Game    @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([stationId, gameId])
+  @@map("station_games")
+  @@index([stationId])
+  @@index([gameId])
+}
+
+model UserOrganization {
+  id             Int       @id @default(autoincrement())
+  userId         Int
+  organizationId Int
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@map("user_organizations")
+  @@index([userId])
+  @@index([organizationId])
+  @@index([userId, organizationId])
+}
