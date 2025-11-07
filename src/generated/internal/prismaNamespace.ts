@@ -393,12 +393,14 @@ export const ModelName = {
   Profile: 'Profile',
   OtpCode: 'OtpCode',
   Organization: 'Organization',
+  OrganizationWorkingHours: 'OrganizationWorkingHours',
   Game: 'Game',
   Console: 'Console',
   Station: 'Station',
   StationGame: 'StationGame',
   StationPricing: 'StationPricing',
-  UserOrganization: 'UserOrganization'
+  UserOrganization: 'UserOrganization',
+  Reservation: 'Reservation'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -414,7 +416,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "profile" | "otpCode" | "organization" | "game" | "console" | "station" | "stationGame" | "stationPricing" | "userOrganization"
+    modelProps: "user" | "profile" | "otpCode" | "organization" | "organizationWorkingHours" | "game" | "console" | "station" | "stationGame" | "stationPricing" | "userOrganization" | "reservation"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -711,6 +713,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.OrganizationCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.OrganizationCountAggregateOutputType> | number
+        }
+      }
+    }
+    OrganizationWorkingHours: {
+      payload: Prisma.$OrganizationWorkingHoursPayload<ExtArgs>
+      fields: Prisma.OrganizationWorkingHoursFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.OrganizationWorkingHoursFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrganizationWorkingHoursPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.OrganizationWorkingHoursFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrganizationWorkingHoursPayload>
+        }
+        findFirst: {
+          args: Prisma.OrganizationWorkingHoursFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrganizationWorkingHoursPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.OrganizationWorkingHoursFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrganizationWorkingHoursPayload>
+        }
+        findMany: {
+          args: Prisma.OrganizationWorkingHoursFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrganizationWorkingHoursPayload>[]
+        }
+        create: {
+          args: Prisma.OrganizationWorkingHoursCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrganizationWorkingHoursPayload>
+        }
+        createMany: {
+          args: Prisma.OrganizationWorkingHoursCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.OrganizationWorkingHoursCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrganizationWorkingHoursPayload>[]
+        }
+        delete: {
+          args: Prisma.OrganizationWorkingHoursDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrganizationWorkingHoursPayload>
+        }
+        update: {
+          args: Prisma.OrganizationWorkingHoursUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrganizationWorkingHoursPayload>
+        }
+        deleteMany: {
+          args: Prisma.OrganizationWorkingHoursDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.OrganizationWorkingHoursUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.OrganizationWorkingHoursUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrganizationWorkingHoursPayload>[]
+        }
+        upsert: {
+          args: Prisma.OrganizationWorkingHoursUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrganizationWorkingHoursPayload>
+        }
+        aggregate: {
+          args: Prisma.OrganizationWorkingHoursAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOrganizationWorkingHours>
+        }
+        groupBy: {
+          args: Prisma.OrganizationWorkingHoursGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrganizationWorkingHoursGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.OrganizationWorkingHoursCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrganizationWorkingHoursCountAggregateOutputType> | number
         }
       }
     }
@@ -1158,6 +1234,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Reservation: {
+      payload: Prisma.$ReservationPayload<ExtArgs>
+      fields: Prisma.ReservationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReservationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReservationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationPayload>
+        }
+        findFirst: {
+          args: Prisma.ReservationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReservationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationPayload>
+        }
+        findMany: {
+          args: Prisma.ReservationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationPayload>[]
+        }
+        create: {
+          args: Prisma.ReservationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationPayload>
+        }
+        createMany: {
+          args: Prisma.ReservationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReservationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationPayload>[]
+        }
+        delete: {
+          args: Prisma.ReservationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationPayload>
+        }
+        update: {
+          args: Prisma.ReservationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationPayload>
+        }
+        deleteMany: {
+          args: Prisma.ReservationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReservationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReservationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationPayload>[]
+        }
+        upsert: {
+          args: Prisma.ReservationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationPayload>
+        }
+        aggregate: {
+          args: Prisma.ReservationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReservation>
+        }
+        groupBy: {
+          args: Prisma.ReservationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReservationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReservationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReservationCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1245,6 +1395,7 @@ export const OrganizationScalarFieldEnum = {
   id: 'id',
   uuid: 'uuid',
   name: 'name',
+  username: 'username',
   province: 'province',
   city: 'city',
   phoneNumber: 'phoneNumber',
@@ -1263,6 +1414,21 @@ export const OrganizationScalarFieldEnum = {
 } as const
 
 export type OrganizationScalarFieldEnum = (typeof OrganizationScalarFieldEnum)[keyof typeof OrganizationScalarFieldEnum]
+
+
+export const OrganizationWorkingHoursScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  dayOfWeek: 'dayOfWeek',
+  isClosed: 'isClosed',
+  is24Hours: 'is24Hours',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrganizationWorkingHoursScalarFieldEnum = (typeof OrganizationWorkingHoursScalarFieldEnum)[keyof typeof OrganizationWorkingHoursScalarFieldEnum]
 
 
 export const GameScalarFieldEnum = {
@@ -1344,6 +1510,30 @@ export const UserOrganizationScalarFieldEnum = {
 } as const
 
 export type UserOrganizationScalarFieldEnum = (typeof UserOrganizationScalarFieldEnum)[keyof typeof UserOrganizationScalarFieldEnum]
+
+
+export const ReservationScalarFieldEnum = {
+  id: 'id',
+  uuid: 'uuid',
+  userId: 'userId',
+  organizationId: 'organizationId',
+  stationId: 'stationId',
+  consoleId: 'consoleId',
+  playerCount: 'playerCount',
+  price: 'price',
+  invoiceId: 'invoiceId',
+  isPaid: 'isPaid',
+  isAccepted: 'isAccepted',
+  isBlockedByOrg: 'isBlockedByOrg',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  reservedDate: 'reservedDate',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReservationScalarFieldEnum = (typeof ReservationScalarFieldEnum)[keyof typeof ReservationScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1543,12 +1733,14 @@ export type GlobalOmitConfig = {
   profile?: Prisma.ProfileOmit
   otpCode?: Prisma.OtpCodeOmit
   organization?: Prisma.OrganizationOmit
+  organizationWorkingHours?: Prisma.OrganizationWorkingHoursOmit
   game?: Prisma.GameOmit
   console?: Prisma.ConsoleOmit
   station?: Prisma.StationOmit
   stationGame?: Prisma.StationGameOmit
   stationPricing?: Prisma.StationPricingOmit
   userOrganization?: Prisma.UserOrganizationOmit
+  reservation?: Prisma.ReservationOmit
 }
 
 /* Types for Logging */

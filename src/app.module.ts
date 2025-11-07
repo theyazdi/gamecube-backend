@@ -14,6 +14,7 @@ import { FtpModule } from './modules/ftp';
 import { JwtModule } from './shared/auth';
 import { LocationModule } from './modules/location/location.module';
 import { GeneralModule } from './modules/general';
+import { ReservationModule } from './modules/reservations';
 
 @Module({
   imports: [
@@ -32,7 +33,8 @@ import { GeneralModule } from './modules/general';
     StationsModule,
     FtpModule,
     LocationModule,
-    GeneralModule
+    GeneralModule,
+    ReservationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

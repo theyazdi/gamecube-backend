@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../shared/database';
 import { Organization } from '../../generated/client';
 import { CreateOrganizationDto, UpdateOrganizationDto } from './dto/organization.dto';
+import { CreateWorkingHoursDto, UpdateWorkingHoursDto, WorkingHoursDto } from './dto/working-hours.dto';
 import { UserRole } from '../../shared';
 
 @Injectable()
@@ -62,6 +63,52 @@ export class OrganizationService {
   async findOrganizationByUuid(uuid: string): Promise<Organization | null> {
     return this.prisma.organization.findUnique({
       where: { uuid },
+    });
+  }
+
+  async findOrganizationByUsername(username: string): Promise<Organization | null> {
+    return this.prisma.organization.findUnique({
+      where: { username },
+    });
+  }
+
+  /**
+   * Get organization by username with all stations and their details
+   * Returns complete organization information including all stations with console, pricings, and games
+   */
+  async getOrganizationByUsernameWithStations(username: string): Promise<Organization | null> {
+    return this.prisma.organization.findUnique({
+      where: { username },
+      include: {
+        stations: {
+          where: {
+            deletedAt: null,
+          },
+          include: {
+            console: true,
+            pricings: {
+              orderBy: {
+                playerCount: 'asc',
+              },
+            },
+            stationGames: {
+              include: {
+                game: {
+                  select: {
+                    id: true,
+                    title: true,
+                    coverImage: true,
+                    category: true,
+                  },
+                },
+              },
+            },
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
+      },
     });
   }
 
@@ -254,5 +301,318 @@ export class OrganizationService {
       select: { organizationId: true },
     });
     return userOrgs.map(uo => uo.organizationId);
+  }
+
+  /**
+   * Get manager's organizations and their stations
+   * Returns organizations with id and name, and all stations from those organizations
+   */
+  async getManagerOrganizationsAndStations(userId: number): Promise<{
+    organizations: { id: number; name: string }[];
+    stations: any[];
+  }> {
+    // Get all organizations managed by this user
+    const userOrganizations = await this.prisma.userOrganization.findMany({
+      where: { userId },
+      include: {
+        organization: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    const organizationIds = userOrganizations.map(uo => uo.organizationId);
+    const organizations = userOrganizations.map(uo => ({
+      id: uo.organization.id,
+      name: uo.organization.name,
+    }));
+
+    // Get all stations from these organizations
+    const stations = await this.prisma.station.findMany({
+      where: {
+        organizationId: {
+          in: organizationIds,
+        },
+        deletedAt: null,
+      },
+      include: {
+        organization: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        console: true,
+        pricings: {
+          orderBy: {
+            playerCount: 'asc',
+          },
+        },
+        stationGames: {
+          include: {
+            game: {
+              select: {
+                id: true,
+                title: true,
+                coverImage: true,
+                category: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return {
+      organizations,
+      stations,
+    };
+  }
+
+  /**
+   * Create or update working hours for an organization
+   * Validates that all 7 days are provided and handles upsert logic
+   */
+  async setWorkingHours(organizationId: number, data: CreateWorkingHoursDto): Promise<any[]> {
+    // Validate that all 7 days are provided
+    if (!data.workingHours || data.workingHours.length !== 7) {
+      throw new BadRequestException('Exactly 7 working hours entries (one for each day) are required');
+    }
+
+    // Validate dayOfWeek values (0-6)
+    const dayOfWeeks = data.workingHours.map(wh => wh.dayOfWeek).sort();
+    const expectedDays = [0, 1, 2, 3, 4, 5, 6];
+    if (JSON.stringify(dayOfWeeks) !== JSON.stringify(expectedDays)) {
+      throw new BadRequestException('All days of week (0-6) must be provided exactly once');
+    }
+
+    // Validate each working hours entry
+    for (const wh of data.workingHours) {
+      if (wh.isClosed && wh.is24Hours) {
+        throw new BadRequestException('A day cannot be both closed and 24 hours');
+      }
+
+      if (!wh.isClosed && !wh.is24Hours) {
+        if (!wh.startTime || !wh.endTime) {
+          throw new BadRequestException('startTime and endTime are required when day is not closed and not 24 hours');
+        }
+
+        // Validate time format and logic
+        const start = this.parseTime(wh.startTime);
+        const end = this.parseTime(wh.endTime);
+        if (start >= end) {
+          throw new BadRequestException('startTime must be before endTime');
+        }
+      }
+    }
+
+    // Upsert working hours for each day
+    const results = await Promise.all(
+      data.workingHours.map(wh =>
+        (this.prisma as any).organizationWorkingHours.upsert({
+          where: {
+            organizationId_dayOfWeek: {
+              organizationId,
+              dayOfWeek: wh.dayOfWeek,
+            },
+          },
+          update: {
+            isClosed: wh.isClosed,
+            is24Hours: wh.is24Hours,
+            startTime: wh.isClosed || wh.is24Hours ? null : wh.startTime,
+            endTime: wh.isClosed || wh.is24Hours ? null : wh.endTime,
+          },
+          create: {
+            organizationId,
+            dayOfWeek: wh.dayOfWeek,
+            isClosed: wh.isClosed,
+            is24Hours: wh.is24Hours,
+            startTime: wh.isClosed || wh.is24Hours ? null : wh.startTime,
+            endTime: wh.isClosed || wh.is24Hours ? null : wh.endTime,
+          },
+        }),
+      ),
+    );
+
+    return results;
+  }
+
+  /**
+   * Get working hours for an organization
+   */
+  async getWorkingHours(organizationId: number): Promise<any[]> {
+    return (this.prisma as any).organizationWorkingHours.findMany({
+      where: { organizationId },
+      orderBy: { dayOfWeek: 'asc' },
+    });
+  }
+
+  /**
+   * Check if organization is open at a specific date and time
+   * Optimized for performance with proper indexes
+   */
+  async isOrganizationOpen(organizationId: number, date: Date): Promise<boolean> {
+    // Get day of week (0 = Saturday, 1 = Sunday, ..., 6 = Friday)
+    const dayOfWeek = this.getDayOfWeek(date);
+
+    // Get working hours for this day
+    const workingHours = await (this.prisma as any).organizationWorkingHours.findUnique({
+      where: {
+        organizationId_dayOfWeek: {
+          organizationId,
+          dayOfWeek,
+        },
+      },
+    });
+
+    if (!workingHours) {
+      return false; // No working hours defined, consider closed
+    }
+
+    if (workingHours.isClosed) {
+      return false;
+    }
+
+    if (workingHours.is24Hours) {
+      return true;
+    }
+
+    // Check if current time is within working hours
+    const currentTime = this.getTimeString(date);
+    const startTime = workingHours.startTime;
+    const endTime = workingHours.endTime;
+
+    if (!startTime || !endTime) {
+      return false;
+    }
+
+    return this.isTimeInRange(currentTime, startTime, endTime);
+  }
+
+  /**
+   * Find organizations open at a specific date and time
+   * Optimized query with proper indexes for high performance
+   */
+  async findOpenOrganizations(date: Date, filters?: {
+    province?: string;
+    city?: string;
+    latitude?: number;
+    longitude?: number;
+    radiusKm?: number;
+  }): Promise<Organization[]> {
+    const dayOfWeek = this.getDayOfWeek(date);
+    const currentTime = this.getTimeString(date);
+
+    // Build base where clause
+    const where: any = {
+      workingHours: {
+        some: {
+          dayOfWeek,
+          OR: [
+            { is24Hours: true },
+            {
+              isClosed: false,
+              is24Hours: false,
+              AND: [
+                { startTime: { lte: currentTime } },
+                { endTime: { gte: currentTime } },
+              ],
+            },
+          ],
+        },
+      },
+    };
+
+    // Add location filters if provided
+    if (filters?.province) {
+      where.province = filters.province;
+    }
+
+    if (filters?.city) {
+      where.city = filters.city;
+    }
+
+    // If location and radius provided, use nearby organizations query
+    if (filters?.latitude && filters?.longitude && filters?.radiusKm) {
+      const nearbyOrgs = await this.findNearbyOrganizations(
+        filters.latitude,
+        filters.longitude,
+        filters.radiusKm,
+      );
+
+      const nearbyOrgIds = nearbyOrgs.map(org => org.id);
+      where.id = { in: nearbyOrgIds };
+    }
+
+    return this.prisma.organization.findMany({
+      where,
+      include: {
+        workingHours: {
+          where: { dayOfWeek },
+        } as any,
+        stations: {
+          where: {
+            deletedAt: null,
+            isAccepted: true,
+            isActive: true,
+          },
+          take: 1, // Just to check if organization has stations
+        },
+      } as any,
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  /**
+   * Helper: Parse time string (HH:MM) to minutes for comparison
+   */
+  private parseTime(timeString: string): number {
+    const [hours, minutes] = timeString.split(':').map(Number);
+    return hours * 60 + minutes;
+  }
+
+  /**
+   * Helper: Get day of week (0 = Saturday, 1 = Sunday, ..., 6 = Friday)
+   */
+  private getDayOfWeek(date: Date): number {
+    // JavaScript: 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    // We need: 0 = Saturday, 1 = Sunday, ..., 6 = Friday
+    const jsDay = date.getDay();
+    return (jsDay + 1) % 7;
+  }
+
+  /**
+   * Helper: Get time string in HH:MM format
+   */
+  private getTimeString(date: Date): string {
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+
+  /**
+   * Helper: Check if time is within range (handles overnight hours)
+   */
+  private isTimeInRange(currentTime: string, startTime: string, endTime: string): boolean {
+    const current = this.parseTime(currentTime);
+    const start = this.parseTime(startTime);
+    const end = this.parseTime(endTime);
+
+    // Normal case: start < end (e.g., 09:00 - 22:00)
+    if (start < end) {
+      return current >= start && current <= end;
+    }
+
+    // Overnight case: start > end (e.g., 22:00 - 06:00)
+    // This means it spans midnight
+    return current >= start || current <= end;
   }
 }

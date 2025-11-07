@@ -62,6 +62,11 @@ export type OtpCode = Prisma.OtpCodeModel
  */
 export type Organization = Prisma.OrganizationModel
 /**
+ * Model OrganizationWorkingHours
+ * 
+ */
+export type OrganizationWorkingHours = Prisma.OrganizationWorkingHoursModel
+/**
  * Model Game
  * 
  */
@@ -91,3 +96,8 @@ export type StationPricing = Prisma.StationPricingModel
  * 
  */
 export type UserOrganization = Prisma.UserOrganizationModel
+/**
+ * Model Reservation
+ * 
+ */
+export type Reservation = Prisma.ReservationModel

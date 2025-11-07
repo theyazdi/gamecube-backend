@@ -52,12 +52,14 @@ export const ModelName = {
   Profile: 'Profile',
   OtpCode: 'OtpCode',
   Organization: 'Organization',
+  OrganizationWorkingHours: 'OrganizationWorkingHours',
   Game: 'Game',
   Console: 'Console',
   Station: 'Station',
   StationGame: 'StationGame',
   StationPricing: 'StationPricing',
-  UserOrganization: 'UserOrganization'
+  UserOrganization: 'UserOrganization',
+  Reservation: 'Reservation'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -124,6 +126,7 @@ export const OrganizationScalarFieldEnum = {
   id: 'id',
   uuid: 'uuid',
   name: 'name',
+  username: 'username',
   province: 'province',
   city: 'city',
   phoneNumber: 'phoneNumber',
@@ -142,6 +145,21 @@ export const OrganizationScalarFieldEnum = {
 } as const
 
 export type OrganizationScalarFieldEnum = (typeof OrganizationScalarFieldEnum)[keyof typeof OrganizationScalarFieldEnum]
+
+
+export const OrganizationWorkingHoursScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  dayOfWeek: 'dayOfWeek',
+  isClosed: 'isClosed',
+  is24Hours: 'is24Hours',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrganizationWorkingHoursScalarFieldEnum = (typeof OrganizationWorkingHoursScalarFieldEnum)[keyof typeof OrganizationWorkingHoursScalarFieldEnum]
 
 
 export const GameScalarFieldEnum = {
@@ -223,6 +241,30 @@ export const UserOrganizationScalarFieldEnum = {
 } as const
 
 export type UserOrganizationScalarFieldEnum = (typeof UserOrganizationScalarFieldEnum)[keyof typeof UserOrganizationScalarFieldEnum]
+
+
+export const ReservationScalarFieldEnum = {
+  id: 'id',
+  uuid: 'uuid',
+  userId: 'userId',
+  organizationId: 'organizationId',
+  stationId: 'stationId',
+  consoleId: 'consoleId',
+  playerCount: 'playerCount',
+  price: 'price',
+  invoiceId: 'invoiceId',
+  isPaid: 'isPaid',
+  isAccepted: 'isAccepted',
+  isBlockedByOrg: 'isBlockedByOrg',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  reservedDate: 'reservedDate',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReservationScalarFieldEnum = (typeof ReservationScalarFieldEnum)[keyof typeof ReservationScalarFieldEnum]
 
 
 export const SortOrder = {

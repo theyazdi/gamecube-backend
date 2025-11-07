@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsOptional, IsBoolean, IsEmail, IsArray, IsUrl, MinLength, IsNumber, IsLatitude, IsLongitude } from 'class-validator';
 import { Type } from 'class-transformer';
+import { StationResponseDto } from '../../stations/dto/station.dto';
 
 export class CreateOrganizationDto {
   @ApiProperty({
@@ -11,6 +12,16 @@ export class CreateOrganizationDto {
   @IsString()
   @MinLength(3)
   name: string;
+
+  @ApiPropertyOptional({
+    description: 'Username for organization profile (unique)',
+    example: 'gamingcafe_tehran',
+    minLength: 3,
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(3)
+  username?: string;
 
   @ApiProperty({
     description: 'Province name',
@@ -136,6 +147,16 @@ export class UpdateOrganizationDto {
   @IsString()
   @MinLength(3)
   name?: string;
+
+  @ApiPropertyOptional({
+    description: 'Username for organization profile (unique)',
+    example: 'gamingcafe_tehran',
+    minLength: 3,
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(3)
+  username?: string;
 
   @ApiPropertyOptional({
     description: 'Province name',
@@ -271,6 +292,12 @@ export class OrganizationResponseDto {
   })
   name: string;
 
+  @ApiPropertyOptional({
+    description: 'Username for organization profile',
+    example: 'gamingcafe_tehran',
+  })
+  username?: string;
+
   @ApiProperty({
     description: 'Province name',
     example: 'Tehran',
@@ -364,4 +391,22 @@ export class OrganizationResponseDto {
     example: '2024-01-01T00:00:00.000Z',
   })
   updatedAt: Date;
+}
+
+export class ManagerOrganizationsResponseDto {
+  @ApiProperty({
+    description: 'List of organizations managed by the user',
+    type: [Object],
+    example: [
+      { id: 1, name: 'Gaming Cafe Tehran' },
+      { id: 2, name: 'Gaming Cafe Isfahan' },
+    ],
+  })
+  organizations: { id: number; name: string }[];
+
+  @ApiProperty({
+    description: 'List of all stations from managed organizations',
+    type: [StationResponseDto],
+  })
+  stations: StationResponseDto[];
 }

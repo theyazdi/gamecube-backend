@@ -279,6 +279,7 @@ export type StationWhereInput = {
   console?: Prisma.XOR<Prisma.ConsoleScalarRelationFilter, Prisma.ConsoleWhereInput>
   stationGames?: Prisma.StationGameListRelationFilter
   pricings?: Prisma.StationPricingListRelationFilter
+  reservations?: Prisma.ReservationListRelationFilter
 }
 
 export type StationOrderByWithRelationInput = {
@@ -297,6 +298,7 @@ export type StationOrderByWithRelationInput = {
   console?: Prisma.ConsoleOrderByWithRelationInput
   stationGames?: Prisma.StationGameOrderByRelationAggregateInput
   pricings?: Prisma.StationPricingOrderByRelationAggregateInput
+  reservations?: Prisma.ReservationOrderByRelationAggregateInput
 }
 
 export type StationWhereUniqueInput = Prisma.AtLeast<{
@@ -318,6 +320,7 @@ export type StationWhereUniqueInput = Prisma.AtLeast<{
   console?: Prisma.XOR<Prisma.ConsoleScalarRelationFilter, Prisma.ConsoleWhereInput>
   stationGames?: Prisma.StationGameListRelationFilter
   pricings?: Prisma.StationPricingListRelationFilter
+  reservations?: Prisma.ReservationListRelationFilter
 }, "id">
 
 export type StationOrderByWithAggregationInput = {
@@ -369,6 +372,7 @@ export type StationCreateInput = {
   console: Prisma.ConsoleCreateNestedOneWithoutStationsInput
   stationGames?: Prisma.StationGameCreateNestedManyWithoutStationInput
   pricings?: Prisma.StationPricingCreateNestedManyWithoutStationInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutStationInput
 }
 
 export type StationUncheckedCreateInput = {
@@ -385,6 +389,7 @@ export type StationUncheckedCreateInput = {
   updatedAt?: Date | string
   stationGames?: Prisma.StationGameUncheckedCreateNestedManyWithoutStationInput
   pricings?: Prisma.StationPricingUncheckedCreateNestedManyWithoutStationInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutStationInput
 }
 
 export type StationUpdateInput = {
@@ -400,6 +405,7 @@ export type StationUpdateInput = {
   console?: Prisma.ConsoleUpdateOneRequiredWithoutStationsNestedInput
   stationGames?: Prisma.StationGameUpdateManyWithoutStationNestedInput
   pricings?: Prisma.StationPricingUpdateManyWithoutStationNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutStationNestedInput
 }
 
 export type StationUncheckedUpdateInput = {
@@ -416,6 +422,7 @@ export type StationUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stationGames?: Prisma.StationGameUncheckedUpdateManyWithoutStationNestedInput
   pricings?: Prisma.StationPricingUncheckedUpdateManyWithoutStationNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutStationNestedInput
 }
 
 export type StationCreateManyInput = {
@@ -640,6 +647,20 @@ export type StationUpdateOneRequiredWithoutPricingsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.StationUpdateToOneWithWhereWithoutPricingsInput, Prisma.StationUpdateWithoutPricingsInput>, Prisma.StationUncheckedUpdateWithoutPricingsInput>
 }
 
+export type StationCreateNestedOneWithoutReservationsInput = {
+  create?: Prisma.XOR<Prisma.StationCreateWithoutReservationsInput, Prisma.StationUncheckedCreateWithoutReservationsInput>
+  connectOrCreate?: Prisma.StationCreateOrConnectWithoutReservationsInput
+  connect?: Prisma.StationWhereUniqueInput
+}
+
+export type StationUpdateOneRequiredWithoutReservationsNestedInput = {
+  create?: Prisma.XOR<Prisma.StationCreateWithoutReservationsInput, Prisma.StationUncheckedCreateWithoutReservationsInput>
+  connectOrCreate?: Prisma.StationCreateOrConnectWithoutReservationsInput
+  upsert?: Prisma.StationUpsertWithoutReservationsInput
+  connect?: Prisma.StationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.StationUpdateToOneWithWhereWithoutReservationsInput, Prisma.StationUpdateWithoutReservationsInput>, Prisma.StationUncheckedUpdateWithoutReservationsInput>
+}
+
 export type StationCreateWithoutOrganizationInput = {
   title: string
   capacity: number
@@ -652,6 +673,7 @@ export type StationCreateWithoutOrganizationInput = {
   console: Prisma.ConsoleCreateNestedOneWithoutStationsInput
   stationGames?: Prisma.StationGameCreateNestedManyWithoutStationInput
   pricings?: Prisma.StationPricingCreateNestedManyWithoutStationInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutStationInput
 }
 
 export type StationUncheckedCreateWithoutOrganizationInput = {
@@ -667,6 +689,7 @@ export type StationUncheckedCreateWithoutOrganizationInput = {
   updatedAt?: Date | string
   stationGames?: Prisma.StationGameUncheckedCreateNestedManyWithoutStationInput
   pricings?: Prisma.StationPricingUncheckedCreateNestedManyWithoutStationInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutStationInput
 }
 
 export type StationCreateOrConnectWithoutOrganizationInput = {
@@ -724,6 +747,7 @@ export type StationCreateWithoutConsoleInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutStationsInput
   stationGames?: Prisma.StationGameCreateNestedManyWithoutStationInput
   pricings?: Prisma.StationPricingCreateNestedManyWithoutStationInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutStationInput
 }
 
 export type StationUncheckedCreateWithoutConsoleInput = {
@@ -739,6 +763,7 @@ export type StationUncheckedCreateWithoutConsoleInput = {
   updatedAt?: Date | string
   stationGames?: Prisma.StationGameUncheckedCreateNestedManyWithoutStationInput
   pricings?: Prisma.StationPricingUncheckedCreateNestedManyWithoutStationInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutStationInput
 }
 
 export type StationCreateOrConnectWithoutConsoleInput = {
@@ -779,6 +804,7 @@ export type StationCreateWithoutStationGamesInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutStationsInput
   console: Prisma.ConsoleCreateNestedOneWithoutStationsInput
   pricings?: Prisma.StationPricingCreateNestedManyWithoutStationInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutStationInput
 }
 
 export type StationUncheckedCreateWithoutStationGamesInput = {
@@ -794,6 +820,7 @@ export type StationUncheckedCreateWithoutStationGamesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   pricings?: Prisma.StationPricingUncheckedCreateNestedManyWithoutStationInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutStationInput
 }
 
 export type StationCreateOrConnectWithoutStationGamesInput = {
@@ -824,6 +851,7 @@ export type StationUpdateWithoutStationGamesInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutStationsNestedInput
   console?: Prisma.ConsoleUpdateOneRequiredWithoutStationsNestedInput
   pricings?: Prisma.StationPricingUpdateManyWithoutStationNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutStationNestedInput
 }
 
 export type StationUncheckedUpdateWithoutStationGamesInput = {
@@ -839,6 +867,7 @@ export type StationUncheckedUpdateWithoutStationGamesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pricings?: Prisma.StationPricingUncheckedUpdateManyWithoutStationNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutStationNestedInput
 }
 
 export type StationCreateWithoutPricingsInput = {
@@ -853,6 +882,7 @@ export type StationCreateWithoutPricingsInput = {
   organization: Prisma.OrganizationCreateNestedOneWithoutStationsInput
   console: Prisma.ConsoleCreateNestedOneWithoutStationsInput
   stationGames?: Prisma.StationGameCreateNestedManyWithoutStationInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutStationInput
 }
 
 export type StationUncheckedCreateWithoutPricingsInput = {
@@ -868,6 +898,7 @@ export type StationUncheckedCreateWithoutPricingsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   stationGames?: Prisma.StationGameUncheckedCreateNestedManyWithoutStationInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutStationInput
 }
 
 export type StationCreateOrConnectWithoutPricingsInput = {
@@ -898,6 +929,7 @@ export type StationUpdateWithoutPricingsInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutStationsNestedInput
   console?: Prisma.ConsoleUpdateOneRequiredWithoutStationsNestedInput
   stationGames?: Prisma.StationGameUpdateManyWithoutStationNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutStationNestedInput
 }
 
 export type StationUncheckedUpdateWithoutPricingsInput = {
@@ -913,6 +945,85 @@ export type StationUncheckedUpdateWithoutPricingsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stationGames?: Prisma.StationGameUncheckedUpdateManyWithoutStationNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutStationNestedInput
+}
+
+export type StationCreateWithoutReservationsInput = {
+  title: string
+  capacity: number
+  status?: boolean
+  isActive?: boolean
+  isAccepted?: boolean
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutStationsInput
+  console: Prisma.ConsoleCreateNestedOneWithoutStationsInput
+  stationGames?: Prisma.StationGameCreateNestedManyWithoutStationInput
+  pricings?: Prisma.StationPricingCreateNestedManyWithoutStationInput
+}
+
+export type StationUncheckedCreateWithoutReservationsInput = {
+  id?: number
+  organizationId: number
+  title: string
+  consoleId: number
+  capacity: number
+  status?: boolean
+  isActive?: boolean
+  isAccepted?: boolean
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  stationGames?: Prisma.StationGameUncheckedCreateNestedManyWithoutStationInput
+  pricings?: Prisma.StationPricingUncheckedCreateNestedManyWithoutStationInput
+}
+
+export type StationCreateOrConnectWithoutReservationsInput = {
+  where: Prisma.StationWhereUniqueInput
+  create: Prisma.XOR<Prisma.StationCreateWithoutReservationsInput, Prisma.StationUncheckedCreateWithoutReservationsInput>
+}
+
+export type StationUpsertWithoutReservationsInput = {
+  update: Prisma.XOR<Prisma.StationUpdateWithoutReservationsInput, Prisma.StationUncheckedUpdateWithoutReservationsInput>
+  create: Prisma.XOR<Prisma.StationCreateWithoutReservationsInput, Prisma.StationUncheckedCreateWithoutReservationsInput>
+  where?: Prisma.StationWhereInput
+}
+
+export type StationUpdateToOneWithWhereWithoutReservationsInput = {
+  where?: Prisma.StationWhereInput
+  data: Prisma.XOR<Prisma.StationUpdateWithoutReservationsInput, Prisma.StationUncheckedUpdateWithoutReservationsInput>
+}
+
+export type StationUpdateWithoutReservationsInput = {
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  capacity?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutStationsNestedInput
+  console?: Prisma.ConsoleUpdateOneRequiredWithoutStationsNestedInput
+  stationGames?: Prisma.StationGameUpdateManyWithoutStationNestedInput
+  pricings?: Prisma.StationPricingUpdateManyWithoutStationNestedInput
+}
+
+export type StationUncheckedUpdateWithoutReservationsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  organizationId?: Prisma.IntFieldUpdateOperationsInput | number
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  consoleId?: Prisma.IntFieldUpdateOperationsInput | number
+  capacity?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  stationGames?: Prisma.StationGameUncheckedUpdateManyWithoutStationNestedInput
+  pricings?: Prisma.StationPricingUncheckedUpdateManyWithoutStationNestedInput
 }
 
 export type StationCreateManyOrganizationInput = {
@@ -940,6 +1051,7 @@ export type StationUpdateWithoutOrganizationInput = {
   console?: Prisma.ConsoleUpdateOneRequiredWithoutStationsNestedInput
   stationGames?: Prisma.StationGameUpdateManyWithoutStationNestedInput
   pricings?: Prisma.StationPricingUpdateManyWithoutStationNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutStationNestedInput
 }
 
 export type StationUncheckedUpdateWithoutOrganizationInput = {
@@ -955,6 +1067,7 @@ export type StationUncheckedUpdateWithoutOrganizationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stationGames?: Prisma.StationGameUncheckedUpdateManyWithoutStationNestedInput
   pricings?: Prisma.StationPricingUncheckedUpdateManyWithoutStationNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutStationNestedInput
 }
 
 export type StationUncheckedUpdateManyWithoutOrganizationInput = {
@@ -995,6 +1108,7 @@ export type StationUpdateWithoutConsoleInput = {
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutStationsNestedInput
   stationGames?: Prisma.StationGameUpdateManyWithoutStationNestedInput
   pricings?: Prisma.StationPricingUpdateManyWithoutStationNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutStationNestedInput
 }
 
 export type StationUncheckedUpdateWithoutConsoleInput = {
@@ -1010,6 +1124,7 @@ export type StationUncheckedUpdateWithoutConsoleInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stationGames?: Prisma.StationGameUncheckedUpdateManyWithoutStationNestedInput
   pricings?: Prisma.StationPricingUncheckedUpdateManyWithoutStationNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutStationNestedInput
 }
 
 export type StationUncheckedUpdateManyWithoutConsoleInput = {
@@ -1033,11 +1148,13 @@ export type StationUncheckedUpdateManyWithoutConsoleInput = {
 export type StationCountOutputType = {
   stationGames: number
   pricings: number
+  reservations: number
 }
 
 export type StationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   stationGames?: boolean | StationCountOutputTypeCountStationGamesArgs
   pricings?: boolean | StationCountOutputTypeCountPricingsArgs
+  reservations?: boolean | StationCountOutputTypeCountReservationsArgs
 }
 
 /**
@@ -1064,6 +1181,13 @@ export type StationCountOutputTypeCountPricingsArgs<ExtArgs extends runtime.Type
   where?: Prisma.StationPricingWhereInput
 }
 
+/**
+ * StationCountOutputType without action
+ */
+export type StationCountOutputTypeCountReservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReservationWhereInput
+}
+
 
 export type StationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1081,6 +1205,7 @@ export type StationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   console?: boolean | Prisma.ConsoleDefaultArgs<ExtArgs>
   stationGames?: boolean | Prisma.Station$stationGamesArgs<ExtArgs>
   pricings?: boolean | Prisma.Station$pricingsArgs<ExtArgs>
+  reservations?: boolean | Prisma.Station$reservationsArgs<ExtArgs>
   _count?: boolean | Prisma.StationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["station"]>
 
@@ -1136,6 +1261,7 @@ export type StationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   console?: boolean | Prisma.ConsoleDefaultArgs<ExtArgs>
   stationGames?: boolean | Prisma.Station$stationGamesArgs<ExtArgs>
   pricings?: boolean | Prisma.Station$pricingsArgs<ExtArgs>
+  reservations?: boolean | Prisma.Station$reservationsArgs<ExtArgs>
   _count?: boolean | Prisma.StationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type StationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1154,6 +1280,7 @@ export type $StationPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     console: Prisma.$ConsolePayload<ExtArgs>
     stationGames: Prisma.$StationGamePayload<ExtArgs>[]
     pricings: Prisma.$StationPricingPayload<ExtArgs>[]
+    reservations: Prisma.$ReservationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1565,6 +1692,7 @@ export interface Prisma__StationClient<T, Null = never, ExtArgs extends runtime.
   console<T extends Prisma.ConsoleDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ConsoleDefaultArgs<ExtArgs>>): Prisma.Prisma__ConsoleClient<runtime.Types.Result.GetResult<Prisma.$ConsolePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   stationGames<T extends Prisma.Station$stationGamesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Station$stationGamesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StationGamePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   pricings<T extends Prisma.Station$pricingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Station$pricingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StationPricingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reservations<T extends Prisma.Station$reservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Station$reservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2046,6 +2174,30 @@ export type Station$pricingsArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.StationPricingScalarFieldEnum | Prisma.StationPricingScalarFieldEnum[]
+}
+
+/**
+ * Station.reservations
+ */
+export type Station$reservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Reservation
+   */
+  select?: Prisma.ReservationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Reservation
+   */
+  omit?: Prisma.ReservationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReservationInclude<ExtArgs> | null
+  where?: Prisma.ReservationWhereInput
+  orderBy?: Prisma.ReservationOrderByWithRelationInput | Prisma.ReservationOrderByWithRelationInput[]
+  cursor?: Prisma.ReservationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReservationScalarFieldEnum | Prisma.ReservationScalarFieldEnum[]
 }
 
 /**

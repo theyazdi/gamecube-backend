@@ -11,6 +11,8 @@ import {
   HttpStatus,
   HttpCode,
   UseGuards,
+  Req,
+  UsePipes,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -28,7 +30,9 @@ import {
 import { StationService } from './station.service';
 import { Station } from '../../generated/client';
 import { CreateStationDto, UpdateStationDto, StationResponseDto, SearchStationsDto } from './dto/station.dto';
-import { JwtAuthGuard, RolesGuard, Roles, UserRole } from '../../shared';
+import { JwtAuthGuard, RolesGuard, Roles, UserRole, OrganizationManagerGuard } from '../../shared';
+import { AuthenticatedRequest } from '../../shared/interfaces/authenticated-request.interface';
+import { CleanPricingsPipe } from './pipes/clean-pricings.pipe';
 
 @ApiTags('stations')
 @Controller('stations')
@@ -54,6 +58,33 @@ export class StationController {
   })
   async createStation(@Body() createStationDto: CreateStationDto): Promise<Station> {
     return this.stationService.createStation(createStationDto);
+  }
+
+  @Post('manager')
+  @HttpCode(HttpStatus.CREATED)
+  @Roles(UserRole.ORGANIZATION_MANAGER, UserRole.SUPER_ADMIN)
+  @UseGuards(OrganizationManagerGuard)
+  @ApiOperation({
+    summary: 'Create a new station by organization manager',
+    description: 'Creates a new gaming station for an organization. The user must be a manager of the specified organization.',
+  })
+  @ApiBody({ type: CreateStationDto })
+  @ApiCreatedResponse({
+    description: 'Station successfully created',
+    type: StationResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid input data',
+  })
+  @ApiBadRequestResponse({
+    description: 'You do not have permission to add stations to this organization',
+  })
+  async createStationByManager(
+    @Body() createStationDto: CreateStationDto,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<Station> {
+    const user = req.user;
+    return this.stationService.createStationByManager(createStationDto, user.id);
   }
 
   @Get()
@@ -197,6 +228,7 @@ export class StationController {
 
   @Put(':id')
   @Roles(UserRole.SUPER_ADMIN)
+  @UsePipes(CleanPricingsPipe)
   @ApiOperation({
     summary: 'Update station by ID',
     description: 'Updates station information by their ID',
@@ -222,6 +254,42 @@ export class StationController {
     @Body() updateStationDto: UpdateStationDto,
   ): Promise<Station> {
     return this.stationService.updateStation(id, updateStationDto);
+  }
+
+  @Put('manager/:id')
+  @Roles(UserRole.ORGANIZATION_MANAGER, UserRole.SUPER_ADMIN)
+  @UsePipes(CleanPricingsPipe)
+  @ApiOperation({
+    summary: 'Update station by organization manager',
+    description: 'Updates station information. The user must be a manager of the organization that owns this station.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Station ID',
+    type: 'number',
+    example: 1,
+  })
+  @ApiBody({ type: UpdateStationDto })
+  @ApiOkResponse({
+    description: 'Station updated successfully',
+    type: StationResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Station not found',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid input data',
+  })
+  @ApiBadRequestResponse({
+    description: 'You do not have permission to update this station',
+  })
+  async updateStationByManager(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateStationDto: UpdateStationDto,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<Station> {
+    const user = req.user;
+    return this.stationService.updateStationByManager(id, updateStationDto, user.id);
   }
 
   @Delete(':id')

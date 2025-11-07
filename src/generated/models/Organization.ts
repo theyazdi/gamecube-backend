@@ -41,6 +41,7 @@ export type OrganizationMinAggregateOutputType = {
   id: number | null
   uuid: string | null
   name: string | null
+  username: string | null
   province: string | null
   city: string | null
   phoneNumber: string | null
@@ -60,6 +61,7 @@ export type OrganizationMaxAggregateOutputType = {
   id: number | null
   uuid: string | null
   name: string | null
+  username: string | null
   province: string | null
   city: string | null
   phoneNumber: string | null
@@ -79,6 +81,7 @@ export type OrganizationCountAggregateOutputType = {
   id: number
   uuid: number
   name: number
+  username: number
   province: number
   city: number
   phoneNumber: number
@@ -114,6 +117,7 @@ export type OrganizationMinAggregateInputType = {
   id?: true
   uuid?: true
   name?: true
+  username?: true
   province?: true
   city?: true
   phoneNumber?: true
@@ -133,6 +137,7 @@ export type OrganizationMaxAggregateInputType = {
   id?: true
   uuid?: true
   name?: true
+  username?: true
   province?: true
   city?: true
   phoneNumber?: true
@@ -152,6 +157,7 @@ export type OrganizationCountAggregateInputType = {
   id?: true
   uuid?: true
   name?: true
+  username?: true
   province?: true
   city?: true
   phoneNumber?: true
@@ -260,6 +266,7 @@ export type OrganizationGroupByOutputType = {
   id: number
   uuid: string
   name: string
+  username: string | null
   province: string
   city: string
   phoneNumber: string
@@ -304,6 +311,7 @@ export type OrganizationWhereInput = {
   id?: Prisma.IntFilter<"Organization"> | number
   uuid?: Prisma.StringFilter<"Organization"> | string
   name?: Prisma.StringFilter<"Organization"> | string
+  username?: Prisma.StringNullableFilter<"Organization"> | string | null
   province?: Prisma.StringFilter<"Organization"> | string
   city?: Prisma.StringFilter<"Organization"> | string
   phoneNumber?: Prisma.StringFilter<"Organization"> | string
@@ -321,12 +329,15 @@ export type OrganizationWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   stations?: Prisma.StationListRelationFilter
   managers?: Prisma.UserOrganizationListRelationFilter
+  workingHours?: Prisma.OrganizationWorkingHoursListRelationFilter
+  reservations?: Prisma.ReservationListRelationFilter
 }
 
 export type OrganizationOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   uuid?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  username?: Prisma.SortOrderInput | Prisma.SortOrder
   province?: Prisma.SortOrder
   city?: Prisma.SortOrder
   phoneNumber?: Prisma.SortOrder
@@ -344,11 +355,14 @@ export type OrganizationOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   stations?: Prisma.StationOrderByRelationAggregateInput
   managers?: Prisma.UserOrganizationOrderByRelationAggregateInput
+  workingHours?: Prisma.OrganizationWorkingHoursOrderByRelationAggregateInput
+  reservations?: Prisma.ReservationOrderByRelationAggregateInput
 }
 
 export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   id?: number
   uuid?: string
+  username?: string
   AND?: Prisma.OrganizationWhereInput | Prisma.OrganizationWhereInput[]
   OR?: Prisma.OrganizationWhereInput[]
   NOT?: Prisma.OrganizationWhereInput | Prisma.OrganizationWhereInput[]
@@ -370,12 +384,15 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   stations?: Prisma.StationListRelationFilter
   managers?: Prisma.UserOrganizationListRelationFilter
-}, "id" | "uuid">
+  workingHours?: Prisma.OrganizationWorkingHoursListRelationFilter
+  reservations?: Prisma.ReservationListRelationFilter
+}, "id" | "uuid" | "username">
 
 export type OrganizationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   uuid?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  username?: Prisma.SortOrderInput | Prisma.SortOrder
   province?: Prisma.SortOrder
   city?: Prisma.SortOrder
   phoneNumber?: Prisma.SortOrder
@@ -405,6 +422,7 @@ export type OrganizationScalarWhereWithAggregatesInput = {
   id?: Prisma.IntWithAggregatesFilter<"Organization"> | number
   uuid?: Prisma.StringWithAggregatesFilter<"Organization"> | string
   name?: Prisma.StringWithAggregatesFilter<"Organization"> | string
+  username?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
   province?: Prisma.StringWithAggregatesFilter<"Organization"> | string
   city?: Prisma.StringWithAggregatesFilter<"Organization"> | string
   phoneNumber?: Prisma.StringWithAggregatesFilter<"Organization"> | string
@@ -425,6 +443,7 @@ export type OrganizationScalarWhereWithAggregatesInput = {
 export type OrganizationCreateInput = {
   uuid?: string
   name: string
+  username?: string | null
   province: string
   city: string
   phoneNumber: string
@@ -442,12 +461,15 @@ export type OrganizationCreateInput = {
   updatedAt?: Date | string
   stations?: Prisma.StationCreateNestedManyWithoutOrganizationInput
   managers?: Prisma.UserOrganizationCreateNestedManyWithoutOrganizationInput
+  workingHours?: Prisma.OrganizationWorkingHoursCreateNestedManyWithoutOrganizationInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateInput = {
   id?: number
   uuid?: string
   name: string
+  username?: string | null
   province: string
   city: string
   phoneNumber: string
@@ -465,11 +487,14 @@ export type OrganizationUncheckedCreateInput = {
   updatedAt?: Date | string
   stations?: Prisma.StationUncheckedCreateNestedManyWithoutOrganizationInput
   managers?: Prisma.UserOrganizationUncheckedCreateNestedManyWithoutOrganizationInput
+  workingHours?: Prisma.OrganizationWorkingHoursUncheckedCreateNestedManyWithoutOrganizationInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUpdateInput = {
   uuid?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   province?: Prisma.StringFieldUpdateOperationsInput | string
   city?: Prisma.StringFieldUpdateOperationsInput | string
   phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
@@ -487,12 +512,15 @@ export type OrganizationUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stations?: Prisma.StationUpdateManyWithoutOrganizationNestedInput
   managers?: Prisma.UserOrganizationUpdateManyWithoutOrganizationNestedInput
+  workingHours?: Prisma.OrganizationWorkingHoursUpdateManyWithoutOrganizationNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   uuid?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   province?: Prisma.StringFieldUpdateOperationsInput | string
   city?: Prisma.StringFieldUpdateOperationsInput | string
   phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
@@ -510,12 +538,15 @@ export type OrganizationUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stations?: Prisma.StationUncheckedUpdateManyWithoutOrganizationNestedInput
   managers?: Prisma.UserOrganizationUncheckedUpdateManyWithoutOrganizationNestedInput
+  workingHours?: Prisma.OrganizationWorkingHoursUncheckedUpdateManyWithoutOrganizationNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateManyInput = {
   id?: number
   uuid?: string
   name: string
+  username?: string | null
   province: string
   city: string
   phoneNumber: string
@@ -536,6 +567,7 @@ export type OrganizationCreateManyInput = {
 export type OrganizationUpdateManyMutationInput = {
   uuid?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   province?: Prisma.StringFieldUpdateOperationsInput | string
   city?: Prisma.StringFieldUpdateOperationsInput | string
   phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
@@ -557,6 +589,7 @@ export type OrganizationUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   uuid?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   province?: Prisma.StringFieldUpdateOperationsInput | string
   city?: Prisma.StringFieldUpdateOperationsInput | string
   phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
@@ -578,6 +611,7 @@ export type OrganizationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   uuid?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  username?: Prisma.SortOrder
   province?: Prisma.SortOrder
   city?: Prisma.SortOrder
   phoneNumber?: Prisma.SortOrder
@@ -605,6 +639,7 @@ export type OrganizationMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   uuid?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  username?: Prisma.SortOrder
   province?: Prisma.SortOrder
   city?: Prisma.SortOrder
   phoneNumber?: Prisma.SortOrder
@@ -624,6 +659,7 @@ export type OrganizationMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   uuid?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  username?: Prisma.SortOrder
   province?: Prisma.SortOrder
   city?: Prisma.SortOrder
   phoneNumber?: Prisma.SortOrder
@@ -676,6 +712,20 @@ export type NullableDecimalFieldUpdateOperationsInput = {
   divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
+export type OrganizationCreateNestedOneWithoutWorkingHoursInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutWorkingHoursInput, Prisma.OrganizationUncheckedCreateWithoutWorkingHoursInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutWorkingHoursInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutWorkingHoursNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutWorkingHoursInput, Prisma.OrganizationUncheckedCreateWithoutWorkingHoursInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutWorkingHoursInput
+  upsert?: Prisma.OrganizationUpsertWithoutWorkingHoursInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutWorkingHoursInput, Prisma.OrganizationUpdateWithoutWorkingHoursInput>, Prisma.OrganizationUncheckedUpdateWithoutWorkingHoursInput>
+}
+
 export type OrganizationCreateNestedOneWithoutStationsInput = {
   create?: Prisma.XOR<Prisma.OrganizationCreateWithoutStationsInput, Prisma.OrganizationUncheckedCreateWithoutStationsInput>
   connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutStationsInput
@@ -704,9 +754,138 @@ export type OrganizationUpdateOneRequiredWithoutManagersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutManagersInput, Prisma.OrganizationUpdateWithoutManagersInput>, Prisma.OrganizationUncheckedUpdateWithoutManagersInput>
 }
 
+export type OrganizationCreateNestedOneWithoutReservationsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutReservationsInput, Prisma.OrganizationUncheckedCreateWithoutReservationsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutReservationsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutReservationsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutReservationsInput, Prisma.OrganizationUncheckedCreateWithoutReservationsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutReservationsInput
+  upsert?: Prisma.OrganizationUpsertWithoutReservationsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutReservationsInput, Prisma.OrganizationUpdateWithoutReservationsInput>, Prisma.OrganizationUncheckedUpdateWithoutReservationsInput>
+}
+
+export type OrganizationCreateWithoutWorkingHoursInput = {
+  uuid?: string
+  name: string
+  username?: string | null
+  province: string
+  city: string
+  phoneNumber: string
+  email?: string | null
+  managerPhones?: Prisma.OrganizationCreatemanagerPhonesInput | string[]
+  gallery?: Prisma.OrganizationCreategalleryInput | string[]
+  indexImage?: string | null
+  logoImage?: string | null
+  address?: string | null
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  tfHour?: boolean
+  isCube?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  stations?: Prisma.StationCreateNestedManyWithoutOrganizationInput
+  managers?: Prisma.UserOrganizationCreateNestedManyWithoutOrganizationInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutWorkingHoursInput = {
+  id?: number
+  uuid?: string
+  name: string
+  username?: string | null
+  province: string
+  city: string
+  phoneNumber: string
+  email?: string | null
+  managerPhones?: Prisma.OrganizationCreatemanagerPhonesInput | string[]
+  gallery?: Prisma.OrganizationCreategalleryInput | string[]
+  indexImage?: string | null
+  logoImage?: string | null
+  address?: string | null
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  tfHour?: boolean
+  isCube?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  stations?: Prisma.StationUncheckedCreateNestedManyWithoutOrganizationInput
+  managers?: Prisma.UserOrganizationUncheckedCreateNestedManyWithoutOrganizationInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutWorkingHoursInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutWorkingHoursInput, Prisma.OrganizationUncheckedCreateWithoutWorkingHoursInput>
+}
+
+export type OrganizationUpsertWithoutWorkingHoursInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutWorkingHoursInput, Prisma.OrganizationUncheckedUpdateWithoutWorkingHoursInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutWorkingHoursInput, Prisma.OrganizationUncheckedCreateWithoutWorkingHoursInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutWorkingHoursInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutWorkingHoursInput, Prisma.OrganizationUncheckedUpdateWithoutWorkingHoursInput>
+}
+
+export type OrganizationUpdateWithoutWorkingHoursInput = {
+  uuid?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  province?: Prisma.StringFieldUpdateOperationsInput | string
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerPhones?: Prisma.OrganizationUpdatemanagerPhonesInput | string[]
+  gallery?: Prisma.OrganizationUpdategalleryInput | string[]
+  indexImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  tfHour?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCube?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  stations?: Prisma.StationUpdateManyWithoutOrganizationNestedInput
+  managers?: Prisma.UserOrganizationUpdateManyWithoutOrganizationNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutWorkingHoursInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  uuid?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  province?: Prisma.StringFieldUpdateOperationsInput | string
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerPhones?: Prisma.OrganizationUpdatemanagerPhonesInput | string[]
+  gallery?: Prisma.OrganizationUpdategalleryInput | string[]
+  indexImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  tfHour?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCube?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  stations?: Prisma.StationUncheckedUpdateManyWithoutOrganizationNestedInput
+  managers?: Prisma.UserOrganizationUncheckedUpdateManyWithoutOrganizationNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
 export type OrganizationCreateWithoutStationsInput = {
   uuid?: string
   name: string
+  username?: string | null
   province: string
   city: string
   phoneNumber: string
@@ -723,12 +902,15 @@ export type OrganizationCreateWithoutStationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   managers?: Prisma.UserOrganizationCreateNestedManyWithoutOrganizationInput
+  workingHours?: Prisma.OrganizationWorkingHoursCreateNestedManyWithoutOrganizationInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutStationsInput = {
   id?: number
   uuid?: string
   name: string
+  username?: string | null
   province: string
   city: string
   phoneNumber: string
@@ -745,6 +927,8 @@ export type OrganizationUncheckedCreateWithoutStationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   managers?: Prisma.UserOrganizationUncheckedCreateNestedManyWithoutOrganizationInput
+  workingHours?: Prisma.OrganizationWorkingHoursUncheckedCreateNestedManyWithoutOrganizationInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutStationsInput = {
@@ -766,6 +950,7 @@ export type OrganizationUpdateToOneWithWhereWithoutStationsInput = {
 export type OrganizationUpdateWithoutStationsInput = {
   uuid?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   province?: Prisma.StringFieldUpdateOperationsInput | string
   city?: Prisma.StringFieldUpdateOperationsInput | string
   phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
@@ -782,12 +967,15 @@ export type OrganizationUpdateWithoutStationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   managers?: Prisma.UserOrganizationUpdateManyWithoutOrganizationNestedInput
+  workingHours?: Prisma.OrganizationWorkingHoursUpdateManyWithoutOrganizationNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutStationsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   uuid?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   province?: Prisma.StringFieldUpdateOperationsInput | string
   city?: Prisma.StringFieldUpdateOperationsInput | string
   phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
@@ -804,11 +992,14 @@ export type OrganizationUncheckedUpdateWithoutStationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   managers?: Prisma.UserOrganizationUncheckedUpdateManyWithoutOrganizationNestedInput
+  workingHours?: Prisma.OrganizationWorkingHoursUncheckedUpdateManyWithoutOrganizationNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutManagersInput = {
   uuid?: string
   name: string
+  username?: string | null
   province: string
   city: string
   phoneNumber: string
@@ -825,12 +1016,15 @@ export type OrganizationCreateWithoutManagersInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   stations?: Prisma.StationCreateNestedManyWithoutOrganizationInput
+  workingHours?: Prisma.OrganizationWorkingHoursCreateNestedManyWithoutOrganizationInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutManagersInput = {
   id?: number
   uuid?: string
   name: string
+  username?: string | null
   province: string
   city: string
   phoneNumber: string
@@ -847,6 +1041,8 @@ export type OrganizationUncheckedCreateWithoutManagersInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   stations?: Prisma.StationUncheckedCreateNestedManyWithoutOrganizationInput
+  workingHours?: Prisma.OrganizationWorkingHoursUncheckedCreateNestedManyWithoutOrganizationInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutManagersInput = {
@@ -868,6 +1064,7 @@ export type OrganizationUpdateToOneWithWhereWithoutManagersInput = {
 export type OrganizationUpdateWithoutManagersInput = {
   uuid?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   province?: Prisma.StringFieldUpdateOperationsInput | string
   city?: Prisma.StringFieldUpdateOperationsInput | string
   phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
@@ -884,12 +1081,15 @@ export type OrganizationUpdateWithoutManagersInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stations?: Prisma.StationUpdateManyWithoutOrganizationNestedInput
+  workingHours?: Prisma.OrganizationWorkingHoursUpdateManyWithoutOrganizationNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutManagersInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   uuid?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   province?: Prisma.StringFieldUpdateOperationsInput | string
   city?: Prisma.StringFieldUpdateOperationsInput | string
   phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
@@ -906,6 +1106,122 @@ export type OrganizationUncheckedUpdateWithoutManagersInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stations?: Prisma.StationUncheckedUpdateManyWithoutOrganizationNestedInput
+  workingHours?: Prisma.OrganizationWorkingHoursUncheckedUpdateManyWithoutOrganizationNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutReservationsInput = {
+  uuid?: string
+  name: string
+  username?: string | null
+  province: string
+  city: string
+  phoneNumber: string
+  email?: string | null
+  managerPhones?: Prisma.OrganizationCreatemanagerPhonesInput | string[]
+  gallery?: Prisma.OrganizationCreategalleryInput | string[]
+  indexImage?: string | null
+  logoImage?: string | null
+  address?: string | null
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  tfHour?: boolean
+  isCube?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  stations?: Prisma.StationCreateNestedManyWithoutOrganizationInput
+  managers?: Prisma.UserOrganizationCreateNestedManyWithoutOrganizationInput
+  workingHours?: Prisma.OrganizationWorkingHoursCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutReservationsInput = {
+  id?: number
+  uuid?: string
+  name: string
+  username?: string | null
+  province: string
+  city: string
+  phoneNumber: string
+  email?: string | null
+  managerPhones?: Prisma.OrganizationCreatemanagerPhonesInput | string[]
+  gallery?: Prisma.OrganizationCreategalleryInput | string[]
+  indexImage?: string | null
+  logoImage?: string | null
+  address?: string | null
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  tfHour?: boolean
+  isCube?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  stations?: Prisma.StationUncheckedCreateNestedManyWithoutOrganizationInput
+  managers?: Prisma.UserOrganizationUncheckedCreateNestedManyWithoutOrganizationInput
+  workingHours?: Prisma.OrganizationWorkingHoursUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutReservationsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutReservationsInput, Prisma.OrganizationUncheckedCreateWithoutReservationsInput>
+}
+
+export type OrganizationUpsertWithoutReservationsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutReservationsInput, Prisma.OrganizationUncheckedUpdateWithoutReservationsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutReservationsInput, Prisma.OrganizationUncheckedCreateWithoutReservationsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutReservationsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutReservationsInput, Prisma.OrganizationUncheckedUpdateWithoutReservationsInput>
+}
+
+export type OrganizationUpdateWithoutReservationsInput = {
+  uuid?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  province?: Prisma.StringFieldUpdateOperationsInput | string
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerPhones?: Prisma.OrganizationUpdatemanagerPhonesInput | string[]
+  gallery?: Prisma.OrganizationUpdategalleryInput | string[]
+  indexImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  tfHour?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCube?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  stations?: Prisma.StationUpdateManyWithoutOrganizationNestedInput
+  managers?: Prisma.UserOrganizationUpdateManyWithoutOrganizationNestedInput
+  workingHours?: Prisma.OrganizationWorkingHoursUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutReservationsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  uuid?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  province?: Prisma.StringFieldUpdateOperationsInput | string
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerPhones?: Prisma.OrganizationUpdatemanagerPhonesInput | string[]
+  gallery?: Prisma.OrganizationUpdategalleryInput | string[]
+  indexImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  tfHour?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCube?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  stations?: Prisma.StationUncheckedUpdateManyWithoutOrganizationNestedInput
+  managers?: Prisma.UserOrganizationUncheckedUpdateManyWithoutOrganizationNestedInput
+  workingHours?: Prisma.OrganizationWorkingHoursUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 
@@ -916,11 +1232,15 @@ export type OrganizationUncheckedUpdateWithoutManagersInput = {
 export type OrganizationCountOutputType = {
   stations: number
   managers: number
+  workingHours: number
+  reservations: number
 }
 
 export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   stations?: boolean | OrganizationCountOutputTypeCountStationsArgs
   managers?: boolean | OrganizationCountOutputTypeCountManagersArgs
+  workingHours?: boolean | OrganizationCountOutputTypeCountWorkingHoursArgs
+  reservations?: boolean | OrganizationCountOutputTypeCountReservationsArgs
 }
 
 /**
@@ -947,11 +1267,26 @@ export type OrganizationCountOutputTypeCountManagersArgs<ExtArgs extends runtime
   where?: Prisma.UserOrganizationWhereInput
 }
 
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountWorkingHoursArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OrganizationWorkingHoursWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountReservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReservationWhereInput
+}
+
 
 export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   uuid?: boolean
   name?: boolean
+  username?: boolean
   province?: boolean
   city?: boolean
   phoneNumber?: boolean
@@ -969,6 +1304,8 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   updatedAt?: boolean
   stations?: boolean | Prisma.Organization$stationsArgs<ExtArgs>
   managers?: boolean | Prisma.Organization$managersArgs<ExtArgs>
+  workingHours?: boolean | Prisma.Organization$workingHoursArgs<ExtArgs>
+  reservations?: boolean | Prisma.Organization$reservationsArgs<ExtArgs>
   _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["organization"]>
 
@@ -976,6 +1313,7 @@ export type OrganizationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   id?: boolean
   uuid?: boolean
   name?: boolean
+  username?: boolean
   province?: boolean
   city?: boolean
   phoneNumber?: boolean
@@ -997,6 +1335,7 @@ export type OrganizationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   id?: boolean
   uuid?: boolean
   name?: boolean
+  username?: boolean
   province?: boolean
   city?: boolean
   phoneNumber?: boolean
@@ -1018,6 +1357,7 @@ export type OrganizationSelectScalar = {
   id?: boolean
   uuid?: boolean
   name?: boolean
+  username?: boolean
   province?: boolean
   city?: boolean
   phoneNumber?: boolean
@@ -1035,10 +1375,12 @@ export type OrganizationSelectScalar = {
   updatedAt?: boolean
 }
 
-export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "uuid" | "name" | "province" | "city" | "phoneNumber" | "email" | "managerPhones" | "gallery" | "indexImage" | "logoImage" | "address" | "latitude" | "longitude" | "tfHour" | "isCube" | "createdAt" | "updatedAt", ExtArgs["result"]["organization"]>
+export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "uuid" | "name" | "username" | "province" | "city" | "phoneNumber" | "email" | "managerPhones" | "gallery" | "indexImage" | "logoImage" | "address" | "latitude" | "longitude" | "tfHour" | "isCube" | "createdAt" | "updatedAt", ExtArgs["result"]["organization"]>
 export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   stations?: boolean | Prisma.Organization$stationsArgs<ExtArgs>
   managers?: boolean | Prisma.Organization$managersArgs<ExtArgs>
+  workingHours?: boolean | Prisma.Organization$workingHoursArgs<ExtArgs>
+  reservations?: boolean | Prisma.Organization$reservationsArgs<ExtArgs>
   _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type OrganizationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1049,11 +1391,14 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
   objects: {
     stations: Prisma.$StationPayload<ExtArgs>[]
     managers: Prisma.$UserOrganizationPayload<ExtArgs>[]
+    workingHours: Prisma.$OrganizationWorkingHoursPayload<ExtArgs>[]
+    reservations: Prisma.$ReservationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
     uuid: string
     name: string
+    username: string | null
     province: string
     city: string
     phoneNumber: string
@@ -1465,6 +1810,8 @@ export interface Prisma__OrganizationClient<T, Null = never, ExtArgs extends run
   readonly [Symbol.toStringTag]: "PrismaPromise"
   stations<T extends Prisma.Organization$stationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$stationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   managers<T extends Prisma.Organization$managersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$managersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserOrganizationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  workingHours<T extends Prisma.Organization$workingHoursArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$workingHoursArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrganizationWorkingHoursPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reservations<T extends Prisma.Organization$reservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$reservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1497,6 +1844,7 @@ export interface OrganizationFieldRefs {
   readonly id: Prisma.FieldRef<"Organization", 'Int'>
   readonly uuid: Prisma.FieldRef<"Organization", 'String'>
   readonly name: Prisma.FieldRef<"Organization", 'String'>
+  readonly username: Prisma.FieldRef<"Organization", 'String'>
   readonly province: Prisma.FieldRef<"Organization", 'String'>
   readonly city: Prisma.FieldRef<"Organization", 'String'>
   readonly phoneNumber: Prisma.FieldRef<"Organization", 'String'>
@@ -1945,6 +2293,54 @@ export type Organization$managersArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.UserOrganizationScalarFieldEnum | Prisma.UserOrganizationScalarFieldEnum[]
+}
+
+/**
+ * Organization.workingHours
+ */
+export type Organization$workingHoursArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrganizationWorkingHours
+   */
+  select?: Prisma.OrganizationWorkingHoursSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OrganizationWorkingHours
+   */
+  omit?: Prisma.OrganizationWorkingHoursOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrganizationWorkingHoursInclude<ExtArgs> | null
+  where?: Prisma.OrganizationWorkingHoursWhereInput
+  orderBy?: Prisma.OrganizationWorkingHoursOrderByWithRelationInput | Prisma.OrganizationWorkingHoursOrderByWithRelationInput[]
+  cursor?: Prisma.OrganizationWorkingHoursWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OrganizationWorkingHoursScalarFieldEnum | Prisma.OrganizationWorkingHoursScalarFieldEnum[]
+}
+
+/**
+ * Organization.reservations
+ */
+export type Organization$reservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Reservation
+   */
+  select?: Prisma.ReservationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Reservation
+   */
+  omit?: Prisma.ReservationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReservationInclude<ExtArgs> | null
+  where?: Prisma.ReservationWhereInput
+  orderBy?: Prisma.ReservationOrderByWithRelationInput | Prisma.ReservationOrderByWithRelationInput[]
+  cursor?: Prisma.ReservationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReservationScalarFieldEnum | Prisma.ReservationScalarFieldEnum[]
 }
 
 /**

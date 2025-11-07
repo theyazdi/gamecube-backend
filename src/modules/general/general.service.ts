@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { toJalaali, toGregorian } from 'jalaali-js';
+import { PrismaService } from '../../shared/database/prisma.service';
 
 @Injectable()
 export class GeneralService {
+  constructor(private readonly prisma: PrismaService) {}
   /**
    * Get current date and time in Tehran timezone with Persian (Jalaali) calendar
    */
@@ -76,6 +78,90 @@ export class GeneralService {
       timezone: {
         name: 'Asia/Tehran',
         offset: '+03:30',
+      },
+    };
+  }
+
+  /**
+   * دریافت لیست کامل تمام بازی‌ها
+   */
+  async getAllGames() {
+    return this.prisma.game.findMany({
+      include: {
+        consoles: {
+          where: {
+            deletedAt: null,
+          },
+          select: {
+            id: true,
+            name: true,
+            manufacturer: true,
+            releaseYear: true,
+            category: true,
+            displayPriority: true,
+          },
+          orderBy: {
+            displayPriority: 'asc',
+          },
+        },
+      },
+      orderBy: [
+        { displayPriority: 'asc' },
+        { createdAt: 'desc' },
+      ],
+    });
+  }
+
+  /**
+   * دریافت لیست کامل تمام کنسول‌ها
+   */
+  async getAllConsoles() {
+    return this.prisma.console.findMany({
+      where: {
+        deletedAt: null,
+      },
+      include: {
+        games: {
+          where: {
+            isAccepted: true,
+          },
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            coverImage: true,
+            category: true,
+            releaseYear: true,
+            displayPriority: true,
+            isAccepted: true,
+          },
+          orderBy: {
+            displayPriority: 'asc',
+          },
+        },
+      },
+      orderBy: [
+        { displayPriority: 'asc' },
+        { createdAt: 'desc' },
+      ],
+    });
+  }
+
+  /**
+   * دریافت لیست کامل بازی‌ها و کنسول‌ها
+   */
+  async getGamesAndConsoles() {
+    const [games, consoles] = await Promise.all([
+      this.getAllGames(),
+      this.getAllConsoles(),
+    ]);
+
+    return {
+      games,
+      consoles,
+      meta: {
+        totalGames: games.length,
+        totalConsoles: consoles.length,
       },
     };
   }

@@ -19,17 +19,18 @@ model User {
   isVerified      Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  
-  profile         Profile?
-  managedOrganizations UserOrganization[]
 
-  @@map("users")
+  profile              Profile?
+  managedOrganizations UserOrganization[]
+  reservations         Reservation[]
+
   @@index([phone]) // Additional index for faster phone lookups
+  @@map("users")
 }
 
 model Profile {
-  id           Int     @id @default(autoincrement())
-  userId       Int     @unique
+  id           Int      @id @default(autoincrement())
+  userId       Int      @unique
   fName        String?
   lName        String?
   email        String?
@@ -38,7 +39,7 @@ model Profile {
   city         String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("profiles")
@@ -52,15 +53,16 @@ model OtpCode {
   attempts  Int      @default(0)
   createdAt DateTime @default(now())
 
-  @@map("otp_codes")
   @@index([phone])
   @@index([expiresAt])
+  @@map("otp_codes")
 }
 
 model Organization {
-  id            Int       @id @default(autoincrement())
-  uuid          String    @unique @default(uuid())
+  id            Int      @id @default(autoincrement())
+  uuid          String   @unique @default(uuid())
   name          String
+  username      String?  @unique
   province      String
   city          String
   phoneNumber   String
@@ -72,39 +74,64 @@ model Organization {
   address       String?
   latitude      Decimal?
   longitude     Decimal?
-  tfHour        Boolean   @default(false)
-  isCube        Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
-  stations      Station[]
-  managers      UserOrganization[]
+  tfHour        Boolean  @default(false)
+  isCube        Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  @@map("organizations")
+  stations     Station[]
+  managers     UserOrganization[]
+  workingHours OrganizationWorkingHours[]
+  reservations Reservation[]
+
   @@index([uuid])
+  @@index([username])
   @@index([province])
   @@index([city])
   @@index([latitude, longitude])
+  @@index([province, city, latitude, longitude]) // برای فیلتر location-based
+  @@map("organizations")
+}
+
+model OrganizationWorkingHours {
+  id             Int      @id @default(autoincrement())
+  organizationId Int
+  dayOfWeek      Int // 0 = Saturday, 1 = Sunday, 2 = Monday, 3 = Tuesday, 4 = Wednesday, 5 = Thursday, 6 = Friday
+  isClosed       Boolean  @default(false)
+  is24Hours      Boolean  @default(false)
+  startTime      String? // Format: "HH:MM" (e.g., "09:00")
+  endTime        String? // Format: "HH:MM" (e.g., "22:00")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, dayOfWeek])
+  @@index([organizationId])
+  @@index([dayOfWeek])
+  @@index([organizationId, dayOfWeek])
+  @@index([isClosed, is24Hours])
+  @@map("organization_working_hours")
 }
 
 model Game {
-  id              Int       @id @default(autoincrement())
+  id              Int      @id @default(autoincrement())
   title           String
   description     String?
   coverImage      String?
   category        String[]
   releaseYear     Int
-  displayPriority Int       @default(0)
-  isAccepted      Boolean   @default(false)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  
-  consoles     Console[]
-  stations     StationGame[]
+  displayPriority Int      @default(0)
+  isAccepted      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  @@map("games")
+  consoles Console[]
+  stations StationGame[]
+
   @@index([isAccepted])
   @@index([displayPriority])
+  @@map("games")
 }
 
 model Console {
@@ -117,41 +144,45 @@ model Console {
   deletedAt       DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
-  
-  games    Game[]
-  stations Station[]
 
-  @@map("consoles")
+  games        Game[]
+  stations     Station[]
+  reservations Reservation[]
+
   @@index([category])
   @@index([displayPriority])
   @@index([deletedAt])
+  @@map("consoles")
 }
 
 model Station {
   id             Int       @id @default(autoincrement())
-  organizationId  Int
+  organizationId Int
   title          String
   consoleId      Int
   capacity       Int
   status         Boolean   @default(false)
   isActive       Boolean   @default(true)
   isAccepted     Boolean   @default(false)
-  deletedAt       DateTime?
+  deletedAt      DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
-  
-  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  console        Console       @relation(fields: [consoleId], references: [id], onDelete: Restrict)
-  stationGames   StationGame[]
-  pricings       StationPricing[]
 
-  @@map("stations")
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  console      Console          @relation(fields: [consoleId], references: [id], onDelete: Restrict)
+  stationGames StationGame[]
+  pricings     StationPricing[]
+  reservations Reservation[]
+
   @@index([organizationId])
   @@index([consoleId])
   @@index([deletedAt])
   @@index([isAccepted, isActive, deletedAt])
   @@index([consoleId, deletedAt])
   @@index([organizationId, deletedAt])
+  @@index([organizationId, consoleId, isActive, isAccepted, deletedAt]) // برای search optimized
+  @@index([organizationId, capacity, isActive, isAccepted, deletedAt]) // برای playerCount filter
+  @@map("stations")
 }
 
 model StationGame {
@@ -164,42 +195,88 @@ model StationGame {
   game    Game    @relation(fields: [gameId], references: [id], onDelete: Cascade)
 
   @@unique([stationId, gameId])
-  @@map("station_games")
   @@index([stationId])
   @@index([gameId])
   @@index([gameId, stationId])
+  @@map("station_games")
 }
 
 model StationPricing {
-  id         Int      @id @default(autoincrement())
-  stationId  Int
-  playerCount Int      // تعداد نفرات (1, 2, 3, ...)
-  price      Float     // قیمت برای این تعداد نفرات
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id          Int      @id @default(autoincrement())
+  stationId   Int
+  playerCount Int // تعداد نفرات (1, 2, 3, ...)
+  price       Float // قیمت برای این تعداد نفرات
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   station Station @relation(fields: [stationId], references: [id], onDelete: Cascade)
 
   @@unique([stationId, playerCount])
-  @@map("station_pricings")
   @@index([stationId])
   @@index([playerCount])
   @@index([stationId, playerCount])
+  @@map("station_pricings")
 }
 
 model UserOrganization {
-  id             Int       @id @default(autoincrement())
+  id             Int      @id @default(autoincrement())
   userId         Int
   organizationId Int
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@unique([userId, organizationId])
-  @@map("user_organizations")
   @@index([userId])
   @@index([organizationId])
   @@index([userId, organizationId])
+  @@map("user_organizations")
+}
+
+model Reservation {
+  id             Int      @id @default(autoincrement())
+  uuid           String   @unique @default(uuid())
+  userId         Int? // Nullable: برای زمانی که گیم‌نت خودش block می‌کنه
+  organizationId Int
+  stationId      Int
+  consoleId      Int
+  playerCount    Int // تعداد نفرات
+  price          Float // مبلغ رزرو (به ریال یا تومان)
+  invoiceId      String? // شماره فاکتور - فعلاً بدون relation
+  isPaid         Boolean  @default(false)
+  isAccepted     Boolean  @default(false) // تأیید توسط گیم‌نت
+  isBlockedByOrg Boolean  @default(false) // آیا توسط گیم‌نت block شده؟
+  startTime      DateTime // ساعت شروع رزرو
+  endTime        DateTime // ساعت پایان رزرو
+  reservedDate   DateTime // تاریخ رزرو (بدون ساعت) - برای query سریع‌تر
+  notes          String? // یادداشت‌های اضافی
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user         User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  station      Station      @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  console      Console      @relation(fields: [consoleId], references: [id], onDelete: Restrict)
+
+  // ایندکس‌های بهینه برای query های مختلف
+  @@index([uuid])
+  @@index([userId])
+  @@index([organizationId])
+  @@index([stationId])
+  @@index([consoleId])
+  @@index([reservedDate]) // برای جستجوی تاریخ محور
+  @@index([startTime, endTime]) // برای چک کردن تداخل زمانی
+  @@index([stationId, reservedDate]) // برای batch query رزروها
+
+  // ایندکس composite برای query های پیچیده
+  @@index([organizationId, reservedDate, startTime]) // جستجوی رزروهای یک گیم‌نت در یک روز
+  @@index([stationId, reservedDate, startTime, endTime]) // چک کردن availability یک استیشن - MOST IMPORTANT
+  @@index([consoleId, reservedDate, startTime]) // جستجو بر اساس نوع کنسول
+  @@index([reservedDate, startTime, endTime, isPaid, isAccepted]) // رزروهای فعال
+  @@index([organizationId, isAccepted, isPaid]) // مدیریت رزروهای pending
+  @@index([userId, reservedDate]) // تاریخچه رزروهای کاربر
+
+  @@map("reservations")
 }

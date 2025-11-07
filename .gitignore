@@ -56,3 +56,7 @@ pids
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 /generated/prisma
+
+# Prisma query engine temporary files
+**/query_engine-*.tmp*
+**/query_engine-*.dll.node.tmp*

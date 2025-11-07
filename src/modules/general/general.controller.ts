@@ -1,10 +1,13 @@
 import { Controller, Get } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import { GeneralService } from './general.service';
 import {
   ApiTags,
   ApiOperation,
   ApiOkResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
 
 @ApiTags('general')
 @Controller('general')
@@ -49,5 +52,103 @@ export class GeneralController {
     return this.generalService.getPersianDateTime();
   }
 
+  @Get('games-consoles')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'دریافت لیست کامل بازی‌ها و کنسول‌ها',
+    description: `
+این endpoint لیست کامل تمام بازی‌ها و کنسول‌ها را برمی‌گرداند.
+
+**نیاز به Authentication:** بله (JWT Token)
+
+**داده‌های برگشتی:**
+- لیست کامل بازی‌ها با اطلاعات کنسول‌های مرتبط
+- لیست کامل کنسول‌ها با اطلاعات بازی‌های مرتبط
+- Meta information شامل تعداد کل بازی‌ها و کنسول‌ها
+    `,
+  })
+  @ApiOkResponse({
+    description: 'لیست بازی‌ها و کنسول‌ها با موفقیت دریافت شد',
+    schema: {
+      type: 'object',
+      properties: {
+        games: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'number' },
+              title: { type: 'string' },
+              description: { type: 'string', nullable: true },
+              coverImage: { type: 'string', nullable: true },
+              category: { type: 'array', items: { type: 'string' } },
+              releaseYear: { type: 'number' },
+              displayPriority: { type: 'number' },
+              isAccepted: { type: 'boolean' },
+              createdAt: { type: 'string', format: 'date-time' },
+              updatedAt: { type: 'string', format: 'date-time' },
+              consoles: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'number' },
+                    name: { type: 'string' },
+                    manufacturer: { type: 'string', nullable: true },
+                    releaseYear: { type: 'number' },
+                    category: { type: 'string' },
+                    displayPriority: { type: 'number' },
+                  },
+                },
+              },
+            },
+          },
+        },
+        consoles: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'number' },
+              name: { type: 'string' },
+              manufacturer: { type: 'string', nullable: true },
+              releaseYear: { type: 'number' },
+              category: { type: 'string' },
+              displayPriority: { type: 'number' },
+              createdAt: { type: 'string', format: 'date-time' },
+              updatedAt: { type: 'string', format: 'date-time' },
+              games: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'number' },
+                    title: { type: 'string' },
+                    description: { type: 'string', nullable: true },
+                    coverImage: { type: 'string', nullable: true },
+                    category: { type: 'array', items: { type: 'string' } },
+                    releaseYear: { type: 'number' },
+                    displayPriority: { type: 'number' },
+                    isAccepted: { type: 'boolean' },
+                  },
+                },
+              },
+            },
+          },
+        },
+        meta: {
+          type: 'object',
+          properties: {
+            totalGames: { type: 'number' },
+            totalConsoles: { type: 'number' },
+          },
+        },
+      },
+    },
+  })
+  getGamesAndConsoles() {
+    return this.generalService.getGamesAndConsoles();
+  }
 }
 
