@@ -49,6 +49,7 @@ export type OrganizationMinAggregateOutputType = {
   indexImage: string | null
   logoImage: string | null
   address: string | null
+  description: string | null
   latitude: runtime.Decimal | null
   longitude: runtime.Decimal | null
   tfHour: boolean | null
@@ -69,6 +70,7 @@ export type OrganizationMaxAggregateOutputType = {
   indexImage: string | null
   logoImage: string | null
   address: string | null
+  description: string | null
   latitude: runtime.Decimal | null
   longitude: runtime.Decimal | null
   tfHour: boolean | null
@@ -91,6 +93,7 @@ export type OrganizationCountAggregateOutputType = {
   indexImage: number
   logoImage: number
   address: number
+  description: number
   latitude: number
   longitude: number
   tfHour: number
@@ -125,6 +128,7 @@ export type OrganizationMinAggregateInputType = {
   indexImage?: true
   logoImage?: true
   address?: true
+  description?: true
   latitude?: true
   longitude?: true
   tfHour?: true
@@ -145,6 +149,7 @@ export type OrganizationMaxAggregateInputType = {
   indexImage?: true
   logoImage?: true
   address?: true
+  description?: true
   latitude?: true
   longitude?: true
   tfHour?: true
@@ -167,6 +172,7 @@ export type OrganizationCountAggregateInputType = {
   indexImage?: true
   logoImage?: true
   address?: true
+  description?: true
   latitude?: true
   longitude?: true
   tfHour?: true
@@ -276,6 +282,7 @@ export type OrganizationGroupByOutputType = {
   indexImage: string | null
   logoImage: string | null
   address: string | null
+  description: string | null
   latitude: runtime.Decimal | null
   longitude: runtime.Decimal | null
   tfHour: boolean
@@ -321,6 +328,7 @@ export type OrganizationWhereInput = {
   indexImage?: Prisma.StringNullableFilter<"Organization"> | string | null
   logoImage?: Prisma.StringNullableFilter<"Organization"> | string | null
   address?: Prisma.StringNullableFilter<"Organization"> | string | null
+  description?: Prisma.StringNullableFilter<"Organization"> | string | null
   latitude?: Prisma.DecimalNullableFilter<"Organization"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.DecimalNullableFilter<"Organization"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: Prisma.BoolFilter<"Organization"> | boolean
@@ -347,6 +355,7 @@ export type OrganizationOrderByWithRelationInput = {
   indexImage?: Prisma.SortOrderInput | Prisma.SortOrder
   logoImage?: Prisma.SortOrderInput | Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
+  description?: Prisma.SortOrderInput | Prisma.SortOrder
   latitude?: Prisma.SortOrderInput | Prisma.SortOrder
   longitude?: Prisma.SortOrderInput | Prisma.SortOrder
   tfHour?: Prisma.SortOrder
@@ -376,6 +385,7 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   indexImage?: Prisma.StringNullableFilter<"Organization"> | string | null
   logoImage?: Prisma.StringNullableFilter<"Organization"> | string | null
   address?: Prisma.StringNullableFilter<"Organization"> | string | null
+  description?: Prisma.StringNullableFilter<"Organization"> | string | null
   latitude?: Prisma.DecimalNullableFilter<"Organization"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.DecimalNullableFilter<"Organization"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: Prisma.BoolFilter<"Organization"> | boolean
@@ -402,6 +412,7 @@ export type OrganizationOrderByWithAggregationInput = {
   indexImage?: Prisma.SortOrderInput | Prisma.SortOrder
   logoImage?: Prisma.SortOrderInput | Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
+  description?: Prisma.SortOrderInput | Prisma.SortOrder
   latitude?: Prisma.SortOrderInput | Prisma.SortOrder
   longitude?: Prisma.SortOrderInput | Prisma.SortOrder
   tfHour?: Prisma.SortOrder
@@ -432,6 +443,7 @@ export type OrganizationScalarWhereWithAggregatesInput = {
   indexImage?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
   logoImage?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
   address?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
+  description?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
   latitude?: Prisma.DecimalNullableWithAggregatesFilter<"Organization"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.DecimalNullableWithAggregatesFilter<"Organization"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: Prisma.BoolWithAggregatesFilter<"Organization"> | boolean
@@ -453,6 +465,7 @@ export type OrganizationCreateInput = {
   indexImage?: string | null
   logoImage?: string | null
   address?: string | null
+  description?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: boolean
@@ -479,6 +492,7 @@ export type OrganizationUncheckedCreateInput = {
   indexImage?: string | null
   logoImage?: string | null
   address?: string | null
+  description?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: boolean
@@ -504,6 +518,7 @@ export type OrganizationUpdateInput = {
   indexImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logoImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -530,6 +545,7 @@ export type OrganizationUncheckedUpdateInput = {
   indexImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logoImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -556,6 +572,7 @@ export type OrganizationCreateManyInput = {
   indexImage?: string | null
   logoImage?: string | null
   address?: string | null
+  description?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: boolean
@@ -577,6 +594,7 @@ export type OrganizationUpdateManyMutationInput = {
   indexImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logoImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -599,6 +617,7 @@ export type OrganizationUncheckedUpdateManyInput = {
   indexImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logoImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -621,6 +640,7 @@ export type OrganizationCountOrderByAggregateInput = {
   indexImage?: Prisma.SortOrder
   logoImage?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   latitude?: Prisma.SortOrder
   longitude?: Prisma.SortOrder
   tfHour?: Prisma.SortOrder
@@ -647,6 +667,7 @@ export type OrganizationMaxOrderByAggregateInput = {
   indexImage?: Prisma.SortOrder
   logoImage?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   latitude?: Prisma.SortOrder
   longitude?: Prisma.SortOrder
   tfHour?: Prisma.SortOrder
@@ -667,6 +688,7 @@ export type OrganizationMinOrderByAggregateInput = {
   indexImage?: Prisma.SortOrder
   logoImage?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   latitude?: Prisma.SortOrder
   longitude?: Prisma.SortOrder
   tfHour?: Prisma.SortOrder
@@ -781,6 +803,7 @@ export type OrganizationCreateWithoutWorkingHoursInput = {
   indexImage?: string | null
   logoImage?: string | null
   address?: string | null
+  description?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: boolean
@@ -806,6 +829,7 @@ export type OrganizationUncheckedCreateWithoutWorkingHoursInput = {
   indexImage?: string | null
   logoImage?: string | null
   address?: string | null
+  description?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: boolean
@@ -846,6 +870,7 @@ export type OrganizationUpdateWithoutWorkingHoursInput = {
   indexImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logoImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -871,6 +896,7 @@ export type OrganizationUncheckedUpdateWithoutWorkingHoursInput = {
   indexImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logoImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -895,6 +921,7 @@ export type OrganizationCreateWithoutStationsInput = {
   indexImage?: string | null
   logoImage?: string | null
   address?: string | null
+  description?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: boolean
@@ -920,6 +947,7 @@ export type OrganizationUncheckedCreateWithoutStationsInput = {
   indexImage?: string | null
   logoImage?: string | null
   address?: string | null
+  description?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: boolean
@@ -960,6 +988,7 @@ export type OrganizationUpdateWithoutStationsInput = {
   indexImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logoImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -985,6 +1014,7 @@ export type OrganizationUncheckedUpdateWithoutStationsInput = {
   indexImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logoImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1009,6 +1039,7 @@ export type OrganizationCreateWithoutManagersInput = {
   indexImage?: string | null
   logoImage?: string | null
   address?: string | null
+  description?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: boolean
@@ -1034,6 +1065,7 @@ export type OrganizationUncheckedCreateWithoutManagersInput = {
   indexImage?: string | null
   logoImage?: string | null
   address?: string | null
+  description?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: boolean
@@ -1074,6 +1106,7 @@ export type OrganizationUpdateWithoutManagersInput = {
   indexImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logoImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1099,6 +1132,7 @@ export type OrganizationUncheckedUpdateWithoutManagersInput = {
   indexImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logoImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1123,6 +1157,7 @@ export type OrganizationCreateWithoutReservationsInput = {
   indexImage?: string | null
   logoImage?: string | null
   address?: string | null
+  description?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: boolean
@@ -1148,6 +1183,7 @@ export type OrganizationUncheckedCreateWithoutReservationsInput = {
   indexImage?: string | null
   logoImage?: string | null
   address?: string | null
+  description?: string | null
   latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: boolean
@@ -1188,6 +1224,7 @@ export type OrganizationUpdateWithoutReservationsInput = {
   indexImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logoImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1213,6 +1250,7 @@ export type OrganizationUncheckedUpdateWithoutReservationsInput = {
   indexImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   logoImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tfHour?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1296,6 +1334,7 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   indexImage?: boolean
   logoImage?: boolean
   address?: boolean
+  description?: boolean
   latitude?: boolean
   longitude?: boolean
   tfHour?: boolean
@@ -1323,6 +1362,7 @@ export type OrganizationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   indexImage?: boolean
   logoImage?: boolean
   address?: boolean
+  description?: boolean
   latitude?: boolean
   longitude?: boolean
   tfHour?: boolean
@@ -1345,6 +1385,7 @@ export type OrganizationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   indexImage?: boolean
   logoImage?: boolean
   address?: boolean
+  description?: boolean
   latitude?: boolean
   longitude?: boolean
   tfHour?: boolean
@@ -1367,6 +1408,7 @@ export type OrganizationSelectScalar = {
   indexImage?: boolean
   logoImage?: boolean
   address?: boolean
+  description?: boolean
   latitude?: boolean
   longitude?: boolean
   tfHour?: boolean
@@ -1375,7 +1417,7 @@ export type OrganizationSelectScalar = {
   updatedAt?: boolean
 }
 
-export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "uuid" | "name" | "username" | "province" | "city" | "phoneNumber" | "email" | "managerPhones" | "gallery" | "indexImage" | "logoImage" | "address" | "latitude" | "longitude" | "tfHour" | "isCube" | "createdAt" | "updatedAt", ExtArgs["result"]["organization"]>
+export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "uuid" | "name" | "username" | "province" | "city" | "phoneNumber" | "email" | "managerPhones" | "gallery" | "indexImage" | "logoImage" | "address" | "description" | "latitude" | "longitude" | "tfHour" | "isCube" | "createdAt" | "updatedAt", ExtArgs["result"]["organization"]>
 export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   stations?: boolean | Prisma.Organization$stationsArgs<ExtArgs>
   managers?: boolean | Prisma.Organization$managersArgs<ExtArgs>
@@ -1408,6 +1450,7 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     indexImage: string | null
     logoImage: string | null
     address: string | null
+    description: string | null
     latitude: runtime.Decimal | null
     longitude: runtime.Decimal | null
     tfHour: boolean
@@ -1854,6 +1897,7 @@ export interface OrganizationFieldRefs {
   readonly indexImage: Prisma.FieldRef<"Organization", 'String'>
   readonly logoImage: Prisma.FieldRef<"Organization", 'String'>
   readonly address: Prisma.FieldRef<"Organization", 'String'>
+  readonly description: Prisma.FieldRef<"Organization", 'String'>
   readonly latitude: Prisma.FieldRef<"Organization", 'Decimal'>
   readonly longitude: Prisma.FieldRef<"Organization", 'Decimal'>
   readonly tfHour: Prisma.FieldRef<"Organization", 'Boolean'>

@@ -31,7 +31,7 @@ import {
 } from '@nestjs/swagger';
 import { OrganizationService } from './organization.service';
 import { Organization } from '../../generated/client';
-import { CreateOrganizationDto, UpdateOrganizationDto, OrganizationResponseDto, ManagerOrganizationsResponseDto } from './dto/organization.dto';
+import { CreateOrganizationDto, UpdateOrganizationDto, OrganizationResponseDto, ManagerOrganizationsResponseDto, GetOrganizationDetailsDto, OrganizationDetailsResponseDto } from './dto/organization.dto';
 import { CreateWorkingHoursDto, UpdateWorkingHoursDto, WorkingHoursResponseDto } from './dto/working-hours.dto';
 import { JwtAuthGuard, RolesGuard, Roles, UserRole, OrganizationManagerGuard } from '../../shared';
 import { AuthenticatedRequest } from '../../shared/interfaces/authenticated-request.interface';
@@ -474,5 +474,32 @@ export class OrganizationController {
     if (radiusKm) filters.radiusKm = parseFloat(radiusKm);
 
     return this.organizationService.findOpenOrganizations(date, filters);
+  }
+
+  @Post('details')
+  @Roles(UserRole.USER, UserRole.SUPER_ADMIN, UserRole.ORGANIZATION_MANAGER)
+  @ApiOperation({
+    summary: 'Get organization details by username',
+    description: 'Retrieves complete organization information including unique consoles and all stations. Optionally calculates distance if user coordinates are provided.',
+  })
+  @ApiBody({ type: GetOrganizationDetailsDto })
+  @ApiOkResponse({
+    description: 'Organization details retrieved successfully',
+    type: OrganizationDetailsResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Organization not found',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid input data',
+  })
+  async getOrganizationDetails(
+    @Body() dto: GetOrganizationDetailsDto,
+  ): Promise<OrganizationDetailsResponseDto> {
+    return this.organizationService.getOrganizationDetailsByUsername(
+      dto.username,
+      dto.latitude,
+      dto.longitude,
+    );
   }
 }

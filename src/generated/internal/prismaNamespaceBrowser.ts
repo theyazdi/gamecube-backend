@@ -136,6 +136,7 @@ export const OrganizationScalarFieldEnum = {
   indexImage: 'indexImage',
   logoImage: 'logoImage',
   address: 'address',
+  description: 'description',
   latitude: 'latitude',
   longitude: 'longitude',
   tfHour: 'tfHour',

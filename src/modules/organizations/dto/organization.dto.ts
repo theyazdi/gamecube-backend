@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional, IsBoolean, IsEmail, IsArray, IsUrl, MinLength, IsNumber, IsLatitude, IsLongitude } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsEmail, IsArray, IsUrl, MinLength, MaxLength, IsNumber, IsLatitude, IsLongitude, IsNotEmpty } from 'class-validator';
 import { Type } from 'class-transformer';
 import { StationResponseDto } from '../../stations/dto/station.dto';
 
@@ -113,6 +113,16 @@ export class CreateOrganizationDto {
   @IsOptional()
   @IsString()
   address?: string;
+
+  @ApiPropertyOptional({
+    description: 'Organization description in Persian (max 400 characters)',
+    example: 'گیم نت مدرن با بهترین تجهیزات و فضای راحت برای بازی',
+    maxLength: 400,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(400, { message: 'Description must not exceed 400 characters' })
+  description?: string;
 
   @ApiPropertyOptional({
     description: 'Latitude coordinate for map location',
@@ -251,6 +261,16 @@ export class UpdateOrganizationDto {
   address?: string;
 
   @ApiPropertyOptional({
+    description: 'Organization description in Persian (max 400 characters)',
+    example: 'گیم نت مدرن با بهترین تجهیزات و فضای راحت برای بازی',
+    maxLength: 400,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(400, { message: 'Description must not exceed 400 characters' })
+  description?: string;
+
+  @ApiPropertyOptional({
     description: 'Latitude coordinate for map location',
     example: 35.6892,
     type: Number,
@@ -367,6 +387,12 @@ export class OrganizationResponseDto {
   address?: string;
 
   @ApiPropertyOptional({
+    description: 'Organization description in Persian (max 400 characters)',
+    example: 'گیم نت مدرن با بهترین تجهیزات و فضای راحت برای بازی',
+  })
+  description?: string;
+
+  @ApiPropertyOptional({
     description: 'Latitude coordinate for map location',
     example: 35.6892,
     type: Number,
@@ -409,4 +435,182 @@ export class ManagerOrganizationsResponseDto {
     type: [StationResponseDto],
   })
   stations: StationResponseDto[];
+}
+
+export class GetOrganizationDetailsDto {
+  @ApiProperty({
+    description: 'Organization username',
+    example: 'gamingcafe_tehran',
+  })
+  @IsString()
+  @IsNotEmpty()
+  username: string;
+
+  @ApiPropertyOptional({
+    description: 'User latitude for distance calculation',
+    example: 35.6892,
+    type: Number,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @IsLatitude()
+  latitude?: number;
+
+  @ApiPropertyOptional({
+    description: 'User longitude for distance calculation',
+    example: 51.3890,
+    type: Number,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @IsLongitude()
+  longitude?: number;
+}
+
+export class ConsoleInfoDto {
+  @ApiProperty({
+    description: 'Console ID',
+    example: 1,
+  })
+  id: number;
+
+  @ApiProperty({
+    description: 'Console name',
+    example: 'PlayStation 5',
+  })
+  name: string;
+}
+
+export class WorkingHoursDayDto {
+  @ApiProperty({
+    description: 'Day of week (0=Saturday, 1=Sunday, 2=Monday, 3=Tuesday, 4=Wednesday, 5=Thursday, 6=Friday)',
+    example: 0,
+  })
+  dayOfWeek: number;
+
+  @ApiProperty({
+    description: 'Day name in Persian',
+    example: 'شنبه',
+  })
+  dayName: string;
+
+  @ApiProperty({
+    description: 'Working hours status',
+    enum: ['closed', '24hours', 'timeRange'],
+    example: 'timeRange',
+  })
+  status: 'closed' | '24hours' | 'timeRange';
+
+  @ApiPropertyOptional({
+    description: 'Start time in HH:MM format (only if status is timeRange)',
+    example: '09:00',
+  })
+  startTime?: string;
+
+  @ApiPropertyOptional({
+    description: 'End time in HH:MM format (only if status is timeRange)',
+    example: '22:00',
+  })
+  endTime?: string;
+
+  @ApiProperty({
+    description: 'Display text for working hours',
+    example: '09:00 - 22:00',
+  })
+  displayText: string;
+}
+
+export class OrganizationDetailsResponseDto {
+  @ApiProperty({
+    description: 'Organization username',
+    example: 'gamingcafe_tehran',
+  })
+  username: string;
+
+  @ApiProperty({
+    description: 'Organization name',
+    example: 'Gaming Cafe Tehran',
+  })
+  name: string;
+
+  @ApiProperty({
+    description: 'Province name',
+    example: 'Tehran',
+  })
+  province: string;
+
+  @ApiProperty({
+    description: 'City name',
+    example: 'Tehran',
+  })
+  city: string;
+
+  @ApiProperty({
+    description: 'Gallery of image URLs',
+    example: ['https://example.com/image1.jpg', 'https://example.com/image2.jpg'],
+    type: [String],
+  })
+  gallery: string[];
+
+  @ApiPropertyOptional({
+    description: 'Index/featured image URL',
+    example: 'https://example.com/index-image.jpg',
+  })
+  indexImage?: string;
+
+  @ApiPropertyOptional({
+    description: 'Logo image URL',
+    example: 'https://example.com/logo.jpg',
+  })
+  logoImage?: string;
+
+  @ApiProperty({
+    description: '24-hour operation status',
+    example: false,
+  })
+  tfHour: boolean;
+
+  @ApiProperty({
+    description: 'Is a cube gaming cafe',
+    example: false,
+  })
+  isCube: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Physical address of the gaming cafe',
+    example: '123 Main Street, Tehran, Iran',
+  })
+  address?: string;
+
+  @ApiPropertyOptional({
+    description: 'Organization description in Persian (max 400 characters)',
+    example: 'گیم نت مدرن با بهترین تجهیزات و فضای راحت برای بازی',
+  })
+  description?: string;
+
+  @ApiProperty({
+    description: 'Distance from user location in meters (0 if coordinates not provided)',
+    example: 1250,
+  })
+  distance: number;
+
+  @ApiProperty({
+    description: 'List of unique consoles available at this organization',
+    type: [ConsoleInfoDto],
+  })
+  consoles: ConsoleInfoDto[];
+
+  @ApiProperty({
+    description: 'List of all stations in this organization',
+    type: [StationResponseDto],
+  })
+  stations: StationResponseDto[];
+
+  @ApiProperty({
+    description: 'Working hours for each day of the week',
+    type: [WorkingHoursDayDto],
+  })
+  workingHours: WorkingHoursDayDto[];
 }

@@ -72,6 +72,7 @@ model Organization {
   indexImage    String?
   logoImage     String?
   address       String?
+  description   String?  @db.VarChar(400)
   latitude      Decimal?
   longitude     Decimal?
   tfHour        Boolean  @default(false)

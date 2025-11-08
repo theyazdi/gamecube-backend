@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../shared/database';
 import { Organization } from '../../generated/client';
-import { CreateOrganizationDto, UpdateOrganizationDto } from './dto/organization.dto';
+import { CreateOrganizationDto, UpdateOrganizationDto, OrganizationDetailsResponseDto } from './dto/organization.dto';
 import { CreateWorkingHoursDto, UpdateWorkingHoursDto, WorkingHoursDto } from './dto/working-hours.dto';
 import { UserRole } from '../../shared';
+import { calculateDistance } from '../../shared/utils/geo.util';
 
 @Injectable()
 export class OrganizationService {
@@ -614,5 +615,189 @@ export class OrganizationService {
     // Overnight case: start > end (e.g., 22:00 - 06:00)
     // This means it spans midnight
     return current >= start || current <= end;
+  }
+
+  /**
+   * Get organization details by username with unique consoles and all stations
+   * Includes distance calculation if user coordinates are provided
+   */
+  async getOrganizationDetailsByUsername(
+    username: string,
+    userLatitude?: number,
+    userLongitude?: number,
+  ): Promise<OrganizationDetailsResponseDto> {
+    // Get organization with all stations and working hours
+    const organization = await this.prisma.organization.findUnique({
+      where: { username },
+      include: {
+        stations: {
+          where: {
+            deletedAt: null,
+          },
+          include: {
+            console: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            pricings: {
+              orderBy: {
+                playerCount: 'asc',
+              },
+            },
+            stationGames: {
+              include: {
+                game: {
+                  select: {
+                    id: true,
+                    title: true,
+                    coverImage: true,
+                    category: true,
+                  },
+                },
+              },
+            },
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
+        workingHours: {
+          orderBy: {
+            dayOfWeek: 'asc',
+          },
+        },
+      },
+    });
+
+    if (!organization) {
+      throw new NotFoundException(`Organization with username ${username} not found`);
+    }
+
+    // Extract unique consoles from stations
+    const consoleMap = new Map<number, { id: number; name: string }>();
+    organization.stations.forEach((station) => {
+      if (station.console && !consoleMap.has(station.console.id)) {
+        consoleMap.set(station.console.id, {
+          id: station.console.id,
+          name: station.console.name,
+        });
+      }
+    });
+    const uniqueConsoles = Array.from(consoleMap.values());
+
+    // Calculate distance if coordinates provided
+    let distance = 0;
+    if (userLatitude !== undefined && userLongitude !== undefined) {
+      if (organization.latitude && organization.longitude) {
+        const distanceKm = calculateDistance(
+          { latitude: userLatitude, longitude: userLongitude },
+          {
+            latitude: Number(organization.latitude),
+            longitude: Number(organization.longitude),
+          },
+        );
+        // Convert to meters and round
+        distance = Math.round(distanceKm * 1000);
+      }
+    }
+
+    // Map stations to response format
+    const stations = organization.stations.map((station) => ({
+      id: station.id,
+      organizationId: station.organizationId,
+      title: station.title,
+      consoleId: station.consoleId,
+      console: station.console,
+      capacity: station.capacity,
+      status: station.status,
+      isActive: station.isActive,
+      isAccepted: station.isAccepted,
+      pricings: station.pricings.map((pricing) => ({
+        id: pricing.id,
+        playerCount: pricing.playerCount,
+        price: pricing.price,
+        createdAt: pricing.createdAt,
+        updatedAt: pricing.updatedAt,
+      })),
+      stationGames: station.stationGames.map((sg) => ({
+        id: sg.id,
+        game: sg.game,
+        stationId: sg.stationId,
+        gameId: sg.gameId,
+        createdAt: sg.createdAt,
+      })),
+      createdAt: station.createdAt,
+      updatedAt: station.updatedAt,
+    }));
+
+    // Map working hours to response format
+    const dayNames = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'];
+    const workingHoursMap = new Map<number, any>();
+    
+    // Initialize all days
+    for (let i = 0; i < 7; i++) {
+      workingHoursMap.set(i, {
+        dayOfWeek: i,
+        dayName: dayNames[i],
+        status: 'closed' as const,
+        displayText: 'تعطیل',
+      });
+    }
+
+    // Update with actual working hours
+    organization.workingHours.forEach((wh) => {
+      let status: 'closed' | '24hours' | 'timeRange';
+      let displayText: string;
+      let startTime: string | undefined;
+      let endTime: string | undefined;
+
+      if (wh.isClosed) {
+        status = 'closed';
+        displayText = 'تعطیل';
+      } else if (wh.is24Hours) {
+        status = '24hours';
+        displayText = '24 ساعته';
+      } else if (wh.startTime && wh.endTime) {
+        status = 'timeRange';
+        displayText = `${wh.startTime} - ${wh.endTime}`;
+        startTime = wh.startTime;
+        endTime = wh.endTime;
+      } else {
+        // Fallback: if no time specified but not closed/24h, assume closed
+        status = 'closed';
+        displayText = 'تعطیل';
+      }
+
+      workingHoursMap.set(wh.dayOfWeek, {
+        dayOfWeek: wh.dayOfWeek,
+        dayName: dayNames[wh.dayOfWeek],
+        status,
+        startTime,
+        endTime,
+        displayText,
+      });
+    });
+
+    const workingHours = Array.from(workingHoursMap.values());
+
+    return {
+      username: organization.username || '',
+      name: organization.name,
+      province: organization.province,
+      city: organization.city,
+      gallery: organization.gallery,
+      indexImage: organization.indexImage || undefined,
+      logoImage: organization.logoImage || undefined,
+      tfHour: organization.tfHour,
+      isCube: organization.isCube,
+      address: organization.address || undefined,
+      description: organization.description || undefined,
+      distance,
+      consoles: uniqueConsoles,
+      stations,
+      workingHours,
+    };
   }
 }
