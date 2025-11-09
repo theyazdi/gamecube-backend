@@ -83,7 +83,7 @@ export class GeneralService {
   }
 
   /**
-   * دریافت لیست کامل تمام بازی‌ها
+   * Get complete list of all games
    */
   async getAllGames() {
     return this.prisma.game.findMany({
@@ -113,7 +113,7 @@ export class GeneralService {
   }
 
   /**
-   * دریافت لیست کامل تمام کنسول‌ها
+   * Get complete list of all consoles
    */
   async getAllConsoles() {
     return this.prisma.console.findMany({
@@ -148,7 +148,7 @@ export class GeneralService {
   }
 
   /**
-   * دریافت لیست کامل بازی‌ها و کنسول‌ها
+   * Get complete list of games and consoles
    */
   async getGamesAndConsoles() {
     const [games, consoles] = await Promise.all([

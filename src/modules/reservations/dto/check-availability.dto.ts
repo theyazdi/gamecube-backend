@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CheckAvailabilityDto {
   @ApiProperty({
-    description: 'شناسه استیشن',
+    description: 'Station ID',
     example: 5,
   })
   @IsNotEmpty()
@@ -11,7 +11,7 @@ export class CheckAvailabilityDto {
   stationId: number;
 
   @ApiProperty({
-    description: 'تاریخ رزرو (ISO 8601 format)',
+    description: 'Reservation date (ISO 8601 format)',
     example: '2025-01-15',
   })
   @IsNotEmpty()
@@ -19,7 +19,7 @@ export class CheckAvailabilityDto {
   reservedDate: string;
 
   @ApiProperty({
-    description: 'زمان شروع (ISO 8601 format)',
+    description: 'Start time (ISO 8601 format)',
     example: '2025-01-15T16:00:00Z',
   })
   @IsNotEmpty()
@@ -27,7 +27,7 @@ export class CheckAvailabilityDto {
   startTime: string;
 
   @ApiProperty({
-    description: 'زمان پایان (ISO 8601 format)',
+    description: 'End time (ISO 8601 format)',
     example: '2025-01-15T16:30:00Z',
   })
   @IsNotEmpty()

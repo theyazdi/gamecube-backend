@@ -195,8 +195,12 @@ export function isPastDate(date: Date): boolean {
 
 /**
  * چک کردن اینکه آیا یک زمان در گذشته است
+ * @param dateTime زمان برای بررسی
+ * @param toleranceMinutes تعداد دقیقه‌ای که اجازه می‌دهیم زمان گذشته باشد (پیش‌فرض: 0)
  */
-export function isPastTime(dateTime: Date): boolean {
-  return dateTime < new Date();
+export function isPastTime(dateTime: Date, toleranceMinutes: number = 0): boolean {
+  const now = new Date();
+  const thresholdTime = new Date(now.getTime() - toleranceMinutes * 60 * 1000);
+  return dateTime < thresholdTime;
 }
 

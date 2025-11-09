@@ -1,9 +1,9 @@
 import * as jalaali from 'jalaali-js';
 
 /**
- * تبدیل اعداد فارسی به انگلیسی
- * @param text متن شامل اعداد فارسی
- * @returns متن با اعداد انگلیسی
+ * Convert Persian numbers to English
+ * @param text Text containing Persian numbers
+ * @returns Text with English numbers
  */
 export function convertPersianToEnglishNumbers(text: string): string {
   const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
@@ -12,7 +12,7 @@ export function convertPersianToEnglishNumbers(text: string): string {
 
   let result = text;
 
-  // تبدیل اعداد فارسی
+  // Convert Persian numbers
   for (let i = 0; i < persianNumbers.length; i++) {
     result = result.replace(
       new RegExp(persianNumbers[i], 'g'),
@@ -20,7 +20,7 @@ export function convertPersianToEnglishNumbers(text: string): string {
     );
   }
 
-  // تبدیل اعداد عربی
+  // Convert Arabic numbers
   for (let i = 0; i < arabicNumbers.length; i++) {
     result = result.replace(
       new RegExp(arabicNumbers[i], 'g'),
@@ -32,18 +32,18 @@ export function convertPersianToEnglishNumbers(text: string): string {
 }
 
 /**
- * تبدیل تاریخ شمسی به میلادی
- * @param jalaliDate تاریخ شمسی به فرمت YYYY/MM/DD (مثال: 1403/09/15 یا ۱۴۰۳/۰۹/۱۵)
- * @returns تاریخ میلادی (Date object)
+ * Convert Jalali date to Gregorian
+ * @param jalaliDate Jalali date in format YYYY/MM/DD (e.g. 1403/09/15 or ۱۴۰۳/۰۹/۱۵)
+ * @returns Gregorian date (Date object)
  */
 export function jalaliToGregorian(jalaliDate: string): Date {
-  // تبدیل اعداد فارسی به انگلیسی
+  // Convert Persian numbers to English
   const normalizedDate = convertPersianToEnglishNumbers(jalaliDate);
 
-  // Parse تاریخ شمسی
+  // Parse Jalali date
   const parts = normalizedDate.split('/');
   if (parts.length !== 3) {
-    throw new Error('فرمت تاریخ نامعتبر است. فرمت صحیح: YYYY/MM/DD');
+    throw new Error('Invalid date format. Correct format: YYYY/MM/DD');
   }
 
   const jYear = parseInt(parts[0], 10);
@@ -51,67 +51,67 @@ export function jalaliToGregorian(jalaliDate: string): Date {
   const jDay = parseInt(parts[2], 10);
 
   if (isNaN(jYear) || isNaN(jMonth) || isNaN(jDay)) {
-    throw new Error('تاریخ شمسی شامل اعداد نامعتبر است.');
+    throw new Error('Jalali date contains invalid numbers.');
   }
 
   if (jMonth < 1 || jMonth > 12) {
-    throw new Error('ماه باید بین 1 تا 12 باشد.');
+    throw new Error('Month must be between 1 and 12.');
   }
 
   if (jDay < 1 || jDay > 31) {
-    throw new Error('روز باید بین 1 تا 31 باشد.');
+    throw new Error('Day must be between 1 and 31.');
   }
 
-  // تبدیل به میلادی
+  // Convert to Gregorian
   const gregorian = jalaali.toGregorian(jYear, jMonth, jDay);
 
-  // ساخت Date object با timezone تهران (UTC+3:30)
-  // ابتدا با UTC می‌سازیم، بعد timezone تهران رو اعمال می‌کنیم
+  // Create Date object with Tehran timezone (UTC+3:30)
+  // First create with UTC, then apply Tehran timezone
   const date = new Date(
     Date.UTC(gregorian.gy, gregorian.gm - 1, gregorian.gd, 0, 0, 0, 0),
   );
   
-  // تبدیل به timezone تهران (UTC+3:30 = 3.5 ساعت)
-  // برای اینکه تاریخ درست باشه، باید 3.5 ساعت از UTC کم کنیم
-  const tehranOffset = 3.5 * 60 * 60 * 1000; // 3.5 ساعت به میلی‌ثانیه
+  // Convert to Tehran timezone (UTC+3:30 = 3.5 hours)
+  // To get the correct date, we need to subtract 3.5 hours from UTC
+  const tehranOffset = 3.5 * 60 * 60 * 1000; // 3.5 hours in milliseconds
   const tehranDate = new Date(date.getTime() - tehranOffset);
 
   return tehranDate;
 }
 
 /**
- * ترکیب تاریخ و زمان
- * @param date تاریخ (Date object)
- * @param timeString زمان به فرمت HH:mm (مثال: 14:30 یا ۱۴:۳۰)
- * @returns DateTime کامل
+ * Combine date and time
+ * @param date Date (Date object)
+ * @param timeString Time in format HH:mm (e.g. 14:30 or ۱۴:۳۰)
+ * @returns Complete DateTime
  */
 export function combineDateAndTime(date: Date, timeString: string): Date {
-  // تبدیل اعداد فارسی به انگلیسی
+  // Convert Persian numbers to English
   const normalizedTime = convertPersianToEnglishNumbers(timeString);
 
-  // Parse زمان
+  // Parse time
   const parts = normalizedTime.split(':');
   if (parts.length !== 2) {
-    throw new Error('فرمت زمان نامعتبر است. فرمت صحیح: HH:mm');
+    throw new Error('Invalid time format. Correct format: HH:mm');
   }
 
   const hours = parseInt(parts[0], 10);
   const minutes = parseInt(parts[1], 10);
 
   if (isNaN(hours) || isNaN(minutes)) {
-    throw new Error('زمان شامل اعداد نامعتبر است.');
+    throw new Error('Time contains invalid numbers.');
   }
 
   if (hours < 0 || hours > 23) {
-    throw new Error('ساعت باید بین 0 تا 23 باشد.');
+    throw new Error('Hours must be between 0 and 23.');
   }
 
   if (minutes < 0 || minutes > 59) {
-    throw new Error('دقیقه باید بین 0 تا 59 باشد.');
+    throw new Error('Minutes must be between 0 and 59.');
   }
 
-  // ساخت DateTime جدید با timezone تهران
-  // date قبلاً با timezone تهران هست، پس فقط ساعت و دقیقه رو set می‌کنیم
+  // Create new DateTime with Tehran timezone
+  // date already has Tehran timezone, so we only set hours and minutes
   const dateTime = new Date(date);
   dateTime.setHours(hours, minutes, 0, 0);
 
@@ -119,10 +119,10 @@ export function combineDateAndTime(date: Date, timeString: string): Date {
 }
 
 /**
- * تبدیل تاریخ شمسی و زمان به DateTime میلادی
- * @param jalaliDate تاریخ شمسی (مثال: 1403/09/15)
- * @param timeString زمان (مثال: 14:30)
- * @returns DateTime میلادی کامل
+ * Convert Jalali date and time to Gregorian DateTime
+ * @param jalaliDate Jalali date (e.g. 1403/09/15)
+ * @param timeString Time (e.g. 14:30)
+ * @returns Complete Gregorian DateTime
  */
 export function jalaliDateTimeToGregorian(
   jalaliDate: string,
@@ -133,20 +133,20 @@ export function jalaliDateTimeToGregorian(
 }
 
 /**
- * چک کردن اعتبار فرمت تاریخ شمسی (پشتیبانی از اعداد فارسی و انگلیسی)
+ * Check validity of Jalali date format (supports Persian and English numbers)
  */
 export function isValidJalaliDateFormat(dateString: string): boolean {
-  // تبدیل اعداد فارسی به انگلیسی برای چک کردن
+  // Convert Persian numbers to English for checking
   const normalized = convertPersianToEnglishNumbers(dateString);
   const regex = /^\d{4}\/\d{2}\/\d{2}$/;
   return regex.test(normalized);
 }
 
 /**
- * چک کردن اعتبار فرمت زمان (پشتیبانی از اعداد فارسی و انگلیسی)
+ * Check validity of time format (supports Persian and English numbers)
  */
 export function isValidTimeFormat(timeString: string): boolean {
-  // تبدیل اعداد فارسی به انگلیسی برای چک کردن
+  // Convert Persian numbers to English for checking
   const normalized = convertPersianToEnglishNumbers(timeString);
   const regex = /^\d{2}:\d{2}$/;
   return regex.test(normalized);

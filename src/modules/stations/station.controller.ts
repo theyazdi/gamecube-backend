@@ -29,7 +29,13 @@ import {
 } from '@nestjs/swagger';
 import { StationService } from './station.service';
 import { Station } from '../../generated/client';
-import { CreateStationDto, UpdateStationDto, StationResponseDto, SearchStationsDto } from './dto/station.dto';
+import {
+  CreateStationDto,
+  UpdateStationDto,
+  StationResponseDto,
+  SearchStationsDto,
+  StationAvailabilityResponseDto
+} from './dto/station.dto';
 import { JwtAuthGuard, RolesGuard, Roles, UserRole, OrganizationManagerGuard } from '../../shared';
 import { AuthenticatedRequest } from '../../shared/interfaces/authenticated-request.interface';
 import { CleanPricingsPipe } from './pipes/clean-pricings.pipe';
@@ -314,5 +320,46 @@ export class StationController {
   })
   async deleteStation(@Param('id', ParseIntPipe) id: number): Promise<void> {
     await this.stationService.deleteStation(id);
+  }
+
+  @Post('availability')
+  @Roles(UserRole.USER, UserRole.ORGANIZATION_MANAGER, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Get station availability for a specific date',
+    description: 'Returns all time slots (30-minute intervals) within organization working hours for the specified date. Shows which slots are reserved, which are available, and which are in the past.',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        stationId: {
+          type: 'number',
+          example: 1,
+          description: 'Station ID',
+        },
+        date: {
+          type: 'string',
+          example: '1404/08/18',
+          description: 'Jalali date in format YYYY/MM/DD',
+        },
+      },
+      required: ['stationId', 'date'],
+    },
+  })
+  @ApiOkResponse({
+    description: 'Station availability retrieved successfully',
+    type: StationAvailabilityResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Station not found',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid date format',
+  })
+  async getStationAvailability(
+    @Body('stationId', ParseIntPipe) stationId: number,
+    @Body('date') date: string,
+  ): Promise<StationAvailabilityResponseDto> {
+    return this.stationService.getStationAvailability(stationId, date);
   }
 }

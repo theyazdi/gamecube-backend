@@ -56,20 +56,20 @@ export class GeneralController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'دریافت لیست کامل بازی‌ها و کنسول‌ها',
+    summary: 'Get complete list of games and consoles',
     description: `
-این endpoint لیست کامل تمام بازی‌ها و کنسول‌ها را برمی‌گرداند.
+This endpoint returns the complete list of all games and consoles.
 
-**نیاز به Authentication:** بله (JWT Token)
+**Authentication Required:** Yes (JWT Token)
 
-**داده‌های برگشتی:**
-- لیست کامل بازی‌ها با اطلاعات کنسول‌های مرتبط
-- لیست کامل کنسول‌ها با اطلاعات بازی‌های مرتبط
-- Meta information شامل تعداد کل بازی‌ها و کنسول‌ها
+**Returned Data:**
+- Complete list of games with related console information
+- Complete list of consoles with related game information
+- Meta information including total number of games and consoles
     `,
   })
   @ApiOkResponse({
-    description: 'لیست بازی‌ها و کنسول‌ها با موفقیت دریافت شد',
+    description: 'List of games and consoles retrieved successfully',
     schema: {
       type: 'object',
       properties: {

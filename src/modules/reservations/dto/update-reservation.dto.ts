@@ -5,7 +5,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateReservationDto extends PartialType(CreateReservationDto) {
   @ApiPropertyOptional({
-    description: 'وضعیت پرداخت',
+    description: 'Payment status',
     example: true,
   })
   @IsOptional()
@@ -13,7 +13,7 @@ export class UpdateReservationDto extends PartialType(CreateReservationDto) {
   isPaid?: boolean;
 
   @ApiPropertyOptional({
-    description: 'وضعیت تأیید توسط گیم‌نت',
+    description: 'Approval status by gaming cafe',
     example: true,
   })
   @IsOptional()

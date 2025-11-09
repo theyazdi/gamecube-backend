@@ -12,7 +12,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateReservationDto {
   @ApiPropertyOptional({
-    description: 'شناسه کاربر (برای block توسط گیم‌نت null است)',
+    description: 'User ID (null if blocked by gaming cafe)',
     example: 123,
   })
   @IsOptional()
@@ -20,7 +20,7 @@ export class CreateReservationDto {
   userId?: number;
 
   @ApiProperty({
-    description: 'شناسه گیم‌نت',
+    description: 'Gaming cafe ID',
     example: 1,
   })
   @IsNotEmpty()
@@ -28,7 +28,7 @@ export class CreateReservationDto {
   organizationId: number;
 
   @ApiProperty({
-    description: 'شناسه استیشن',
+    description: 'Station ID',
     example: 5,
   })
   @IsNotEmpty()
@@ -36,7 +36,7 @@ export class CreateReservationDto {
   stationId: number;
 
   @ApiProperty({
-    description: 'شناسه کنسول',
+    description: 'Console ID',
     example: 3,
   })
   @IsNotEmpty()
@@ -44,7 +44,7 @@ export class CreateReservationDto {
   consoleId: number;
 
   @ApiProperty({
-    description: 'تعداد نفرات',
+    description: 'Number of players',
     example: 2,
     minimum: 1,
   })
@@ -54,7 +54,7 @@ export class CreateReservationDto {
   playerCount: number;
 
   @ApiProperty({
-    description: 'تاریخ رزرو (ISO 8601 format)',
+    description: 'Reservation date (ISO 8601 format)',
     example: '2025-01-15',
   })
   @IsNotEmpty()
@@ -62,7 +62,7 @@ export class CreateReservationDto {
   reservedDate: string;
 
   @ApiProperty({
-    description: 'زمان شروع (ISO 8601 format)',
+    description: 'Start time (ISO 8601 format)',
     example: '2025-01-15T16:00:00Z',
   })
   @IsNotEmpty()
@@ -70,7 +70,7 @@ export class CreateReservationDto {
   startTime: string;
 
   @ApiProperty({
-    description: 'زمان پایان (ISO 8601 format)',
+    description: 'End time (ISO 8601 format)',
     example: '2025-01-15T16:30:00Z',
   })
   @IsNotEmpty()
@@ -78,7 +78,7 @@ export class CreateReservationDto {
   endTime: string;
 
   @ApiPropertyOptional({
-    description: 'مبلغ رزرو (اگر ارسال نشود از StationPricing محاسبه می‌شود)',
+    description: 'Reservation price (if not sent, calculated from StationPricing)',
     example: 50000,
   })
   @IsOptional()
@@ -87,7 +87,7 @@ export class CreateReservationDto {
   price?: number;
 
   @ApiPropertyOptional({
-    description: 'شماره فاکتور',
+    description: 'Invoice number',
     example: 'INV-2025-0001',
   })
   @IsOptional()
@@ -95,7 +95,7 @@ export class CreateReservationDto {
   invoiceId?: string;
 
   @ApiPropertyOptional({
-    description: 'آیا توسط گیم‌نت block شده است؟',
+    description: 'Is blocked by gaming cafe?',
     example: false,
     default: false,
   })
@@ -104,8 +104,8 @@ export class CreateReservationDto {
   isBlockedByOrg?: boolean;
 
   @ApiPropertyOptional({
-    description: 'یادداشت‌های اضافی',
-    example: 'درخواست اتاق VIP',
+    description: 'Additional notes',
+    example: 'VIP room request',
   })
   @IsOptional()
   @IsString()

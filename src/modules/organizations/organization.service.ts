@@ -733,7 +733,7 @@ export class OrganizationService {
     }));
 
     // Map working hours to response format
-    const dayNames = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'];
+    const dayNames = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
     const workingHoursMap = new Map<number, any>();
     
     // Initialize all days
@@ -742,7 +742,7 @@ export class OrganizationService {
         dayOfWeek: i,
         dayName: dayNames[i],
         status: 'closed' as const,
-        displayText: 'تعطیل',
+        displayText: 'Closed',
       });
     }
 
@@ -755,10 +755,10 @@ export class OrganizationService {
 
       if (wh.isClosed) {
         status = 'closed';
-        displayText = 'تعطیل';
+        displayText = 'Closed';
       } else if (wh.is24Hours) {
         status = '24hours';
-        displayText = '24 ساعته';
+        displayText = '24 Hours';
       } else if (wh.startTime && wh.endTime) {
         status = 'timeRange';
         displayText = `${wh.startTime} - ${wh.endTime}`;
@@ -767,7 +767,7 @@ export class OrganizationService {
       } else {
         // Fallback: if no time specified but not closed/24h, assume closed
         status = 'closed';
-        displayText = 'تعطیل';
+        displayText = 'Closed';
       }
 
       workingHoursMap.set(wh.dayOfWeek, {

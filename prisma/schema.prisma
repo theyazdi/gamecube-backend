@@ -90,7 +90,7 @@ model Organization {
   @@index([province])
   @@index([city])
   @@index([latitude, longitude])
-  @@index([province, city, latitude, longitude]) // برای فیلتر location-based
+  @@index([province, city, latitude, longitude]) // For location-based filtering
   @@map("organizations")
 }
 
@@ -181,8 +181,8 @@ model Station {
   @@index([isAccepted, isActive, deletedAt])
   @@index([consoleId, deletedAt])
   @@index([organizationId, deletedAt])
-  @@index([organizationId, consoleId, isActive, isAccepted, deletedAt]) // برای search optimized
-  @@index([organizationId, capacity, isActive, isAccepted, deletedAt]) // برای playerCount filter
+  @@index([organizationId, consoleId, isActive, isAccepted, deletedAt]) // For optimized search
+  @@index([organizationId, capacity, isActive, isAccepted, deletedAt]) // For playerCount filter
   @@map("stations")
 }
 
@@ -205,8 +205,8 @@ model StationGame {
 model StationPricing {
   id          Int      @id @default(autoincrement())
   stationId   Int
-  playerCount Int // تعداد نفرات (1, 2, 3, ...)
-  price       Float // قیمت برای این تعداد نفرات
+  playerCount Int // Number of players (1, 2, 3, ...)
+  price       Float // Price for this number of players
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -239,20 +239,20 @@ model UserOrganization {
 model Reservation {
   id             Int      @id @default(autoincrement())
   uuid           String   @unique @default(uuid())
-  userId         Int? // Nullable: برای زمانی که گیم‌نت خودش block می‌کنه
+  userId         Int? // Nullable: when gaming cafe blocks it
   organizationId Int
   stationId      Int
   consoleId      Int
-  playerCount    Int // تعداد نفرات
-  price          Float // مبلغ رزرو (به ریال یا تومان)
-  invoiceId      String? // شماره فاکتور - فعلاً بدون relation
+  playerCount    Int // Number of players
+  price          Float // Reservation amount (in Rials or Tomans)
+  invoiceId      String? // Invoice number - currently without relation
   isPaid         Boolean  @default(false)
-  isAccepted     Boolean  @default(false) // تأیید توسط گیم‌نت
-  isBlockedByOrg Boolean  @default(false) // آیا توسط گیم‌نت block شده؟
-  startTime      DateTime // ساعت شروع رزرو
-  endTime        DateTime // ساعت پایان رزرو
-  reservedDate   DateTime // تاریخ رزرو (بدون ساعت) - برای query سریع‌تر
-  notes          String? // یادداشت‌های اضافی
+  isAccepted     Boolean  @default(false) // Approved by gaming cafe
+  isBlockedByOrg Boolean  @default(false) // Is blocked by gaming cafe?
+  startTime      DateTime // Reservation start time
+  endTime        DateTime // Reservation end time
+  reservedDate   DateTime // Reservation date (without time) - for faster queries
+  notes          String? // Additional notes
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -261,23 +261,23 @@ model Reservation {
   station      Station      @relation(fields: [stationId], references: [id], onDelete: Cascade)
   console      Console      @relation(fields: [consoleId], references: [id], onDelete: Restrict)
 
-  // ایندکس‌های بهینه برای query های مختلف
+  // Optimized indexes for different queries
   @@index([uuid])
   @@index([userId])
   @@index([organizationId])
   @@index([stationId])
   @@index([consoleId])
-  @@index([reservedDate]) // برای جستجوی تاریخ محور
-  @@index([startTime, endTime]) // برای چک کردن تداخل زمانی
-  @@index([stationId, reservedDate]) // برای batch query رزروها
+  @@index([reservedDate]) // For date-based search
+  @@index([startTime, endTime]) // For checking time overlap
+  @@index([stationId, reservedDate]) // For batch query of reservations
 
-  // ایندکس composite برای query های پیچیده
-  @@index([organizationId, reservedDate, startTime]) // جستجوی رزروهای یک گیم‌نت در یک روز
-  @@index([stationId, reservedDate, startTime, endTime]) // چک کردن availability یک استیشن - MOST IMPORTANT
-  @@index([consoleId, reservedDate, startTime]) // جستجو بر اساس نوع کنسول
-  @@index([reservedDate, startTime, endTime, isPaid, isAccepted]) // رزروهای فعال
-  @@index([organizationId, isAccepted, isPaid]) // مدیریت رزروهای pending
-  @@index([userId, reservedDate]) // تاریخچه رزروهای کاربر
+  // Composite indexes for complex queries
+  @@index([organizationId, reservedDate, startTime]) // Search reservations for a gaming cafe in one day
+  @@index([stationId, reservedDate, startTime, endTime]) // Check station availability - MOST IMPORTANT
+  @@index([consoleId, reservedDate, startTime]) // Search by console type
+  @@index([reservedDate, startTime, endTime, isPaid, isAccepted]) // Active reservations
+  @@index([organizationId, isAccepted, isPaid]) // Manage pending reservations
+  @@index([userId, reservedDate]) // User reservation history
 
   @@map("reservations")
 }

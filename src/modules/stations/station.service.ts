@@ -1,7 +1,15 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../shared/database';
 import { Station } from '../../generated/client';
-import { CreateStationDto, UpdateStationDto, SearchStationsDto } from './dto/station.dto';
+import {
+  CreateStationDto,
+  UpdateStationDto,
+  SearchStationsDto,
+  StationAvailabilityResponseDto,
+  TimeSlotResponseDto
+} from './dto/station.dto';
+import { jalaliToGregorian } from '../../shared/utils/date-converter.util';
+import { parseTimeString, isPastTime } from '../../shared/utils/time-slot.util';
 
 @Injectable()
 export class StationService {
@@ -475,7 +483,7 @@ export class StationService {
   async deleteStation(id: number): Promise<Station> {
     // Check if station exists and is not already deleted
     const station = await this.prisma.station.findFirst({
-      where: { 
+      where: {
         id,
         deletedAt: null,
       },
@@ -492,5 +500,243 @@ export class StationService {
         deletedAt: new Date(),
       },
     });
+  }
+
+  /**
+   * Get station availability with time slots for a specific date
+   * Returns all time slots within organization working hours, marking reserved and past slots
+   */
+  async getStationAvailability(stationId: number, jalaliDate: string): Promise<StationAvailabilityResponseDto> {
+    // 1. Find station with full details
+    const station = await this.prisma.station.findFirst({
+      where: {
+        id: stationId,
+        deletedAt: null,
+      },
+      include: {
+        console: {
+          select: {
+            id: true,
+            name: true,
+            manufacturer: true,
+            category: true,
+          },
+        },
+        pricings: {
+          select: {
+            playerCount: true,
+            price: true,
+          },
+          orderBy: {
+            playerCount: 'asc',
+          },
+        },
+        stationGames: {
+          include: {
+            game: {
+              select: {
+                id: true,
+                title: true,
+                coverImage: true,
+              },
+            },
+          },
+        },
+        organization: {
+          select: {
+            id: true,
+            workingHours: true,
+          },
+        },
+      },
+    });
+
+    if (!station) {
+      throw new NotFoundException(`Station with ID ${stationId} not found`);
+    }
+
+    // 2. Convert Jalali date to Gregorian
+    let gregorianDate: Date;
+    try {
+      gregorianDate = jalaliToGregorian(jalaliDate);
+    } catch (error) {
+      throw new BadRequestException(`Invalid Jalali date format: ${jalaliDate}. Use YYYY/MM/DD format.`);
+    }
+
+    // 3. Get day of week (0 = Saturday, 1 = Sunday, ..., 6 = Friday)
+    const dayOfWeek = this.getIranianDayOfWeek(gregorianDate);
+
+    // 4. Get working hours for this day
+    const workingHours = station.organization.workingHours.find((wh) => wh.dayOfWeek === dayOfWeek);
+
+    if (!workingHours) {
+      throw new NotFoundException(
+        `Working hours not found for this day of week (${dayOfWeek})`,
+      );
+    }
+
+    if (workingHours.isClosed) {
+      // Organization is closed on this day
+      return {
+        station: {
+          id: station.id,
+          title: station.title,
+          consoleId: station.consoleId,
+          capacity: station.capacity,
+          status: station.status,
+          isActive: station.isActive,
+          isAccepted: station.isAccepted,
+          console: station.console,
+          pricings: station.pricings,
+          stationGames: station.stationGames,
+        },
+        workingHours: {
+          dayOfWeek: workingHours.dayOfWeek,
+          isClosed: workingHours.isClosed,
+          is24Hours: workingHours.is24Hours,
+          startTime: workingHours.startTime,
+          endTime: workingHours.endTime,
+        },
+        timeSlots: [], // No time slots available if closed
+      };
+    }
+
+    // 5. Generate time slots based on working hours
+    let startTime: Date;
+    let endTime: Date;
+
+    if (workingHours.is24Hours) {
+      // 24 hours operation
+      startTime = new Date(gregorianDate);
+      startTime.setHours(0, 0, 0, 0);
+      endTime = new Date(gregorianDate);
+      endTime.setHours(23, 59, 59, 999);
+    } else {
+      // Parse start and end times
+      if (!workingHours.startTime || !workingHours.endTime) {
+        throw new BadRequestException(
+          'Working hours start and end times must be defined for non-24-hour operation',
+        );
+      }
+
+      try {
+        startTime = parseTimeString(gregorianDate, workingHours.startTime);
+        endTime = parseTimeString(gregorianDate, workingHours.endTime);
+      } catch (error) {
+        throw new BadRequestException(
+          `Invalid working hours time format: ${error.message}`,
+        );
+      }
+    }
+
+    // 6. Generate 30-minute time slots
+    const timeSlots: TimeSlotResponseDto[] = [];
+    const currentSlotTime = new Date(startTime);
+
+    while (currentSlotTime < endTime) {
+      const slotStart = new Date(currentSlotTime);
+      const slotEnd = new Date(currentSlotTime);
+      slotEnd.setMinutes(slotEnd.getMinutes() + 30);
+
+      // Don't add slots that go beyond end time
+      if (slotEnd > endTime) {
+        break;
+      }
+
+      // Format label
+      const label = `${this.formatTime(slotStart)} - ${this.formatTime(slotEnd)}`;
+
+      timeSlots.push({
+        startTime: slotStart,
+        endTime: slotEnd,
+        label,
+        isReserved: false,
+        isAvailable: true,
+      });
+
+      currentSlotTime.setMinutes(currentSlotTime.getMinutes() + 30);
+    }
+
+    // 7. Get all reservations for this station on this date
+    const reservedDate = new Date(gregorianDate);
+    reservedDate.setHours(0, 0, 0, 0);
+
+    const reservations = await this.prisma.reservation.findMany({
+      where: {
+        stationId: stationId,
+        reservedDate: reservedDate,
+      },
+      select: {
+        startTime: true,
+        endTime: true,
+      },
+    });
+
+    // 8. Mark reserved slots and check if past
+    const now = new Date();
+
+    for (const slot of timeSlots) {
+      // Check if slot is in the past
+      if (isPastTime(slot.endTime)) {
+        slot.isAvailable = false;
+      }
+
+      // Check if slot is reserved
+      const reservation = reservations.find((r) => {
+        return (
+          (slot.startTime >= r.startTime && slot.startTime < r.endTime) ||
+          (slot.endTime > r.startTime && slot.endTime <= r.endTime) ||
+          (slot.startTime <= r.startTime && slot.endTime >= r.endTime)
+        );
+      });
+
+      if (reservation) {
+        slot.isReserved = true;
+        slot.isAvailable = false;
+      }
+    }
+
+    // 9. Return response
+    return {
+      station: {
+        id: station.id,
+        title: station.title,
+        consoleId: station.consoleId,
+        capacity: station.capacity,
+        status: station.status,
+        isActive: station.isActive,
+        isAccepted: station.isAccepted,
+        console: station.console,
+        pricings: station.pricings,
+        stationGames: station.stationGames,
+      },
+      workingHours: {
+        dayOfWeek: workingHours.dayOfWeek,
+        isClosed: workingHours.isClosed,
+        is24Hours: workingHours.is24Hours,
+        startTime: workingHours.startTime,
+        endTime: workingHours.endTime,
+      },
+      timeSlots,
+    };
+  }
+
+  /**
+   * Get Iranian day of week (0 = Saturday, 1 = Sunday, ..., 6 = Friday)
+   * JavaScript: 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+   */
+  private getIranianDayOfWeek(date: Date): number {
+    const jsDay = date.getDay(); // 0 = Sunday
+    // Convert to Iranian week: Saturday = 0, Sunday = 1, ..., Friday = 6
+    return (jsDay + 1) % 7;
+  }
+
+  /**
+   * Format time as HH:MM
+   */
+  private formatTime(date: Date): string {
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
   }
 }

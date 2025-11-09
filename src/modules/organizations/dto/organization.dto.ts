@@ -491,8 +491,8 @@ export class WorkingHoursDayDto {
   dayOfWeek: number;
 
   @ApiProperty({
-    description: 'Day name in Persian',
-    example: 'شنبه',
+    description: 'Day name',
+    example: 'Saturday',
   })
   dayName: string;
 

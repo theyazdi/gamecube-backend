@@ -355,3 +355,103 @@ export class SearchStationsDto {
   @Type(() => Boolean)
   accepted?: boolean;
 }
+
+export class GetStationAvailabilityDto {
+  @ApiProperty({
+    description: 'Jalali date in format YYYY/MM/DD (e.g., 1404/08/18)',
+    example: '1404/08/18',
+  })
+  @IsString()
+  @IsNotEmpty()
+  date: string;
+
+  @ApiProperty({
+    description: 'Station ID',
+    example: 1,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  @Type(() => Number)
+  stationId: number;
+}
+
+export class TimeSlotResponseDto {
+  @ApiProperty({
+    description: 'Start time of the slot',
+    example: '2024-12-01T09:00:00.000Z',
+  })
+  startTime: Date;
+
+  @ApiProperty({
+    description: 'End time of the slot',
+    example: '2024-12-01T09:30:00.000Z',
+  })
+  endTime: Date;
+
+  @ApiProperty({
+    description: 'Time label (HH:MM - HH:MM)',
+    example: '09:00 - 09:30',
+  })
+  label: string;
+
+  @ApiProperty({
+    description: 'Is this slot reserved',
+    example: false,
+  })
+  isReserved: boolean;
+
+  @ApiProperty({
+    description: 'Is this slot available (not reserved and not in the past)',
+    example: true,
+  })
+  isAvailable: boolean;
+}
+
+export class StationAvailabilityResponseDto {
+  @ApiProperty({
+    description: 'Station information',
+  })
+  station: {
+    id: number;
+    title: string;
+    consoleId: number;
+    capacity: number;
+    status: boolean;
+    isActive: boolean;
+    isAccepted: boolean;
+    console: {
+      id: number;
+      name: string;
+      manufacturer: string | null;
+      category: string;
+    };
+    pricings: {
+      playerCount: number;
+      price: number;
+    }[];
+    stationGames: {
+      game: {
+        id: number;
+        title: string;
+        coverImage: string | null;
+      };
+    }[];
+  };
+
+  @ApiProperty({
+    description: 'Organization working hours for the requested date',
+  })
+  workingHours: {
+    dayOfWeek: number;
+    isClosed: boolean;
+    is24Hours: boolean;
+    startTime: string | null;
+    endTime: string | null;
+  };
+
+  @ApiProperty({
+    description: 'Available time slots for the requested date',
+    type: [TimeSlotResponseDto],
+  })
+  timeSlots: TimeSlotResponseDto[];
+}

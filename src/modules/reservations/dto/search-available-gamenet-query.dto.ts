@@ -11,7 +11,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class SearchAvailableGamenetQueryDto {
   @ApiProperty({
-    description: 'عرض جغرافیایی کاربر',
+    description: 'User latitude',
     example: 35.6892,
     minimum: -90,
     maximum: 90,
@@ -23,7 +23,7 @@ export class SearchAvailableGamenetQueryDto {
   latitude: number;
 
   @ApiProperty({
-    description: 'طول جغرافیایی کاربر',
+    description: 'User longitude',
     example: 51.389,
     minimum: -180,
     maximum: 180,
@@ -35,7 +35,7 @@ export class SearchAvailableGamenetQueryDto {
   longitude: number;
 
   @ApiProperty({
-    description: 'شعاع جستجو به کیلومتر',
+    description: 'Search radius in kilometers',
     example: 10,
     minimum: 5,
     maximum: 30,
@@ -48,7 +48,7 @@ export class SearchAvailableGamenetQueryDto {
   radiusKm: number;
 
   @ApiPropertyOptional({
-    description: 'تاریخ شمسی (فرمت: YYYY/MM/DD مثال: 1403/09/15)',
+    description: 'Jalali date (format: YYYY/MM/DD e.g. 1403/09/15)',
     example: '1403/09/15',
   })
   @IsOptional()
@@ -56,7 +56,7 @@ export class SearchAvailableGamenetQueryDto {
   date?: string;
 
   @ApiPropertyOptional({
-    description: 'ساعت شروع (فرمت: HH:mm مثال: 14:30)',
+    description: 'Start time (format: HH:mm e.g. 14:30)',
     example: '14:30',
   })
   @IsOptional()
@@ -64,7 +64,7 @@ export class SearchAvailableGamenetQueryDto {
   startTime?: string;
 
   @ApiPropertyOptional({
-    description: 'ساعت پایان (فرمت: HH:mm مثال: 18:00)',
+    description: 'End time (format: HH:mm e.g. 18:00)',
     example: '18:00',
   })
   @IsOptional()
@@ -72,23 +72,23 @@ export class SearchAvailableGamenetQueryDto {
   endTime?: string;
 
   @ApiPropertyOptional({
-    description: 'استان',
-    example: 'تهران',
+    description: 'Province',
+    example: 'Tehran',
   })
   @IsOptional()
   @IsString()
   province?: string;
 
   @ApiPropertyOptional({
-    description: 'شهر',
-    example: 'تهران',
+    description: 'City',
+    example: 'Tehran',
   })
   @IsOptional()
   @IsString()
   city?: string;
 
   @ApiPropertyOptional({
-    description: 'شناسه کنسول',
+    description: 'Console ID',
     example: 2,
   })
   @IsOptional()
@@ -97,7 +97,7 @@ export class SearchAvailableGamenetQueryDto {
   consoleId?: number;
 
   @ApiPropertyOptional({
-    description: 'شناسه بازی',
+    description: 'Game ID',
     example: 123,
   })
   @IsOptional()
@@ -106,7 +106,7 @@ export class SearchAvailableGamenetQueryDto {
   gameId?: number;
 
   @ApiPropertyOptional({
-    description: 'تعداد نفرات',
+    description: 'Number of players',
     example: 4,
     minimum: 1,
     maximum: 20,
@@ -117,19 +117,5 @@ export class SearchAvailableGamenetQueryDto {
   @Min(1)
   @Max(20)
   playerCount?: number;
-
-  @ApiPropertyOptional({
-    description: 'محدودیت تعداد نتایج',
-    example: 20,
-    default: 20,
-    minimum: 1,
-    maximum: 100,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(100)
-  limit?: number;
 }
 

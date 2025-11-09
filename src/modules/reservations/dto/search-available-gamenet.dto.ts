@@ -11,7 +11,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class SearchAvailableGamenetDto {
   @ApiProperty({
-    description: 'عرض جغرافیایی کاربر',
+    description: 'User latitude',
     example: 35.6892,
     minimum: -90,
     maximum: 90,
@@ -23,7 +23,7 @@ export class SearchAvailableGamenetDto {
   latitude: number;
 
   @ApiProperty({
-    description: 'طول جغرافیایی کاربر',
+    description: 'User longitude',
     example: 51.389,
     minimum: -180,
     maximum: 180,
@@ -35,7 +35,7 @@ export class SearchAvailableGamenetDto {
   longitude: number;
 
   @ApiProperty({
-    description: 'شعاع جستجو به کیلومتر',
+    description: 'Search radius in kilometers',
     example: 5,
     minimum: 0.1,
     maximum: 50,
@@ -47,7 +47,7 @@ export class SearchAvailableGamenetDto {
   radiusKm: number;
 
   @ApiProperty({
-    description: 'شناسه کنسول',
+    description: 'Console ID',
     example: 3,
   })
   @IsNotEmpty()
@@ -55,7 +55,7 @@ export class SearchAvailableGamenetDto {
   consoleId: number;
 
   @ApiPropertyOptional({
-    description: 'شناسه بازی (اختیاری)',
+    description: 'Game ID (optional)',
     example: 42,
   })
   @IsOptional()
@@ -63,7 +63,7 @@ export class SearchAvailableGamenetDto {
   gameId?: number;
 
   @ApiProperty({
-    description: 'تاریخ رزرو (ISO 8601 format)',
+    description: 'Reservation date (ISO 8601 format)',
     example: '2025-01-15',
   })
   @IsNotEmpty()
@@ -71,7 +71,7 @@ export class SearchAvailableGamenetDto {
   reservedDate: string;
 
   @ApiProperty({
-    description: 'زمان شروع (ISO 8601 format)',
+    description: 'Start time (ISO 8601 format)',
     example: '2025-01-15T16:00:00Z',
   })
   @IsNotEmpty()
@@ -79,7 +79,7 @@ export class SearchAvailableGamenetDto {
   startTime: string;
 
   @ApiProperty({
-    description: 'زمان پایان (ISO 8601 format)',
+    description: 'End time (ISO 8601 format)',
     example: '2025-01-15T16:30:00Z',
   })
   @IsNotEmpty()
@@ -87,7 +87,7 @@ export class SearchAvailableGamenetDto {
   endTime: string;
 
   @ApiProperty({
-    description: 'تعداد نفرات',
+    description: 'Number of players',
     example: 2,
     minimum: 1,
   })
@@ -97,7 +97,7 @@ export class SearchAvailableGamenetDto {
   playerCount: number;
 
   @ApiPropertyOptional({
-    description: 'محدودیت تعداد نتایج',
+    description: 'Result limit',
     example: 20,
     default: 20,
     minimum: 1,

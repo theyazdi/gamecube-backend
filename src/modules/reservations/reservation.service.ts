@@ -10,6 +10,7 @@ import {
   UpdateReservationDto,
   SearchAvailableGamenetDto,
   CheckAvailabilityDto,
+  SearchAvailableStationsDto,
 } from './dto';
 import { SearchAvailableGamenetQueryDto } from './dto/search-available-gamenet-query.dto';
 import {
@@ -36,26 +37,26 @@ export class ReservationService {
   ) {}
 
   /**
-   * ایجاد رزرو جدید
+   * Create a new reservation
    */
   async create(dto: CreateReservationDto) {
     const startTime = new Date(dto.startTime);
     const endTime = new Date(dto.endTime);
     const reservedDate = new Date(dto.reservedDate);
 
-    // Validation 1: چک کردن اعتبار time slot
+    // Validation 1: Check time slot validity
     if (!isValidTimeSlot(startTime, endTime)) {
       throw new BadRequestException(
-        'بازه زمانی نامعتبر است. رزروها باید نیم ساعته و راس ساعت باشند.',
+        'Invalid time slot. Reservations must be 30-minute intervals starting on the hour.',
       );
     }
 
-    // Validation 2: چک کردن گذشته نبودن زمان
+    // Validation 2: Check that time is not in the past
     if (isPastTime(startTime)) {
-      throw new BadRequestException('نمی‌توان برای زمان گذشته رزرو ایجاد کرد.');
+      throw new BadRequestException('Cannot create reservation for past time.');
     }
 
-    // Validation 3: چک کردن وجود station
+    // Validation 3: Check station existence
     const station = await this.prisma.station.findFirst({
       where: {
         id: dto.stationId,
@@ -73,17 +74,17 @@ export class ReservationService {
     });
 
     if (!station) {
-      throw new NotFoundException('استیشن یافت نشد یا غیرفعال است.');
+      throw new NotFoundException('Station not found or inactive.');
     }
 
-    // Validation 4: چک کردن ظرفیت
+    // Validation 4: Check capacity
     if (dto.playerCount > station.capacity) {
       throw new BadRequestException(
-        `تعداد نفرات بیشتر از ظرفیت استیشن است. ظرفیت: ${station.capacity}`,
+        `Number of players exceeds station capacity. Capacity: ${station.capacity}`,
       );
     }
 
-    // Validation 5: چک کردن availability
+    // Validation 5: Check availability
     const isAvailable = await this.checkAvailability({
       stationId: dto.stationId,
       reservedDate: dto.reservedDate,
@@ -93,23 +94,23 @@ export class ReservationService {
 
     if (!isAvailable) {
       throw new ConflictException(
-        'این بازه زمانی قبلاً رزرو شده است یا در دسترس نیست.',
+        'This time slot is already reserved or not available.',
       );
     }
 
-    // محاسبه قیمت
+    // Calculate price
     let price = dto.price;
     if (!price) {
       if (station.pricings.length > 0) {
         price = station.pricings[0].price;
       } else {
         throw new BadRequestException(
-          'قیمت برای این تعداد نفرات تعریف نشده است.',
+          'Price is not defined for this number of players.',
         );
       }
     }
 
-    // ایجاد رزرو
+    // Create reservation
     const reservation = await this.prisma.reservation.create({
       data: {
         userId: dto.userId,
@@ -120,8 +121,8 @@ export class ReservationService {
         price,
         invoiceId: dto.invoiceId,
         isBlockedByOrg: dto.isBlockedByOrg || false,
-        isPaid: dto.isBlockedByOrg || false, // اگر block باشد، معمولاً paid هست
-        isAccepted: dto.isBlockedByOrg || false, // اگر block باشد، معمولاً accepted هست
+        isPaid: dto.isBlockedByOrg || false, // If blocked, usually paid
+        isAccepted: dto.isBlockedByOrg || false, // If blocked, usually accepted
         startTime,
         endTime,
         reservedDate: getDateOnly(reservedDate),
@@ -171,7 +172,7 @@ export class ReservationService {
   }
 
   /**
-   * بروزرسانی رزرو
+   * Update a reservation
    */
   async update(id: number, dto: UpdateReservationDto) {
     const reservation = await this.prisma.reservation.findUnique({
@@ -179,10 +180,10 @@ export class ReservationService {
     });
 
     if (!reservation) {
-      throw new NotFoundException('رزرو یافت نشد.');
+      throw new NotFoundException('Reservation not found.');
     }
 
-    // اگر زمان تغییر می‌کند، باید availability چک شود
+    // If time is changing, availability must be checked
     if (dto.startTime || dto.endTime) {
       const startTime = dto.startTime
         ? new Date(dto.startTime)
@@ -190,16 +191,16 @@ export class ReservationService {
       const endTime = dto.endTime ? new Date(dto.endTime) : reservation.endTime;
 
       if (!isValidTimeSlot(startTime, endTime)) {
-        throw new BadRequestException('بازه زمانی نامعتبر است.');
+        throw new BadRequestException('Invalid time slot.');
       }
 
       if (isPastTime(startTime)) {
         throw new BadRequestException(
-          'نمی‌توان رزرو را به زمان گذشته تغییر داد.',
+          'Cannot change reservation to past time.',
         );
       }
 
-      // چک availability (به جز رزرو خود این)
+      // Check availability (excluding this reservation)
       const conflictingReservations = await this.prisma.reservation.count({
         where: {
           stationId: reservation.stationId,
@@ -229,7 +230,7 @@ export class ReservationService {
       });
 
       if (conflictingReservations > 0) {
-        throw new ConflictException('بازه زمانی جدید در دسترس نیست.');
+        throw new ConflictException('New time slot is not available.');
       }
     }
 
@@ -277,7 +278,7 @@ export class ReservationService {
   }
 
   /**
-   * حذف رزرو
+   * Delete a reservation
    */
   async remove(id: number) {
     const reservation = await this.prisma.reservation.findUnique({
@@ -285,16 +286,16 @@ export class ReservationService {
     });
 
     if (!reservation) {
-      throw new NotFoundException('رزرو یافت نشد.');
+      throw new NotFoundException('Reservation not found.');
     }
 
     await this.prisma.reservation.delete({ where: { id } });
 
-    return { message: 'رزرو با موفقیت حذف شد.' };
+    return { message: 'Reservation deleted successfully.' };
   }
 
   /**
-   * دریافت تک رزرو
+   * Get a single reservation
    */
   async findOne(id: number) {
     const reservation = await this.prisma.reservation.findUnique({
@@ -337,14 +338,14 @@ export class ReservationService {
     });
 
     if (!reservation) {
-      throw new NotFoundException('رزرو یافت نشد.');
+      throw new NotFoundException('Reservation not found.');
     }
 
     return reservation;
   }
 
   /**
-   * دریافت رزروهای یک کاربر
+   * Get reservations for a user
    */
   async findByUser(userId: number, page = 1, limit = 20) {
     const skip = (page - 1) * limit;
@@ -382,7 +383,7 @@ export class ReservationService {
   }
 
   /**
-   * دریافت رزروهای یک گیم‌نت
+   * Get reservations for a gaming cafe
    */
   async findByOrganization(organizationId: number, page = 1, limit = 20) {
     const skip = (page - 1) * limit;
@@ -425,7 +426,7 @@ export class ReservationService {
   }
 
   /**
-   * چک کردن در دسترس بودن یک بازه زمانی
+   * Check availability of a time slot
    */
   async checkAvailability(dto: CheckAvailabilityDto): Promise<boolean> {
     const startTime = new Date(dto.startTime);
@@ -460,7 +461,7 @@ export class ReservationService {
   }
 
   /**
-   * جستجوی گیم‌نت‌های قابل رزرو بر اساس مختصات جغرافیایی
+   * Search available gaming cafes based on geographical coordinates
    */
   async searchAvailableGamenets(dto: SearchAvailableGamenetDto) {
     const startTime = new Date(dto.startTime);
@@ -470,20 +471,20 @@ export class ReservationService {
 
     // Validation
     if (!isValidTimeSlot(startTime, endTime)) {
-      throw new BadRequestException('بازه زمانی نامعتبر است.');
+      throw new BadRequestException('Invalid time slot.');
     }
 
     if (isPastTime(startTime)) {
-      throw new BadRequestException('نمی‌توان برای زمان گذشته جستجو کرد.');
+      throw new BadRequestException('Cannot search for past time.');
     }
 
-    // محاسبه bounding box
+    // Calculate bounding box
     const bbox = calculateBoundingBox(
       { latitude: dto.latitude, longitude: dto.longitude },
       dto.radiusKm,
     );
 
-    // Query با Prisma (Raw SQL برای بهینه‌سازی بیشتر)
+    // Query with Prisma (Raw SQL for better optimization)
     const query = Prisma.sql`
       WITH nearby_orgs AS (
         SELECT 
@@ -570,7 +571,7 @@ export class ReservationService {
 
     const results = await this.prisma.$queryRaw<any[]>(query);
 
-    // دریافت قیمت‌ها برای هر استیشن
+    // Get prices for each station
     for (const org of results) {
       if (org.stations && Array.isArray(org.stations)) {
         for (const station of org.stations) {
@@ -591,7 +592,7 @@ export class ReservationService {
   }
 
   /**
-   * دریافت time slot های موجود برای یک استیشن در یک روز
+   * Get available time slots for a station in a day
    */
   async getAvailableTimeSlots(
     stationId: number,
@@ -605,7 +606,7 @@ export class ReservationService {
   > {
     const reservedDate = getDateOnly(new Date(date));
 
-    // دریافت تمام رزروهای این استیشن در این روز
+    // Get all reservations for this station on this day
     const reservations = await this.prisma.reservation.findMany({
       where: {
         stationId,
@@ -618,10 +619,10 @@ export class ReservationService {
       orderBy: { startTime: 'asc' },
     });
 
-    // تولید تمام time slot های روز
+    // Generate all time slots for the day
     const allSlots = this.generateDayTimeSlots(reservedDate);
 
-    // فیلتر کردن slot های موجود
+    // Filter available slots
     const availableSlots = allSlots.filter((slot) => {
       return !reservations.some((reservation) => {
         return (
@@ -635,8 +636,8 @@ export class ReservationService {
   }
 
   /**
-   * Helper: تولید تمام time slot های یک روز
-   * استفاده از timezone تهران (UTC+3:30)
+   * Helper: Generate all time slots for a day
+   * Uses Tehran timezone (UTC+3:30)
    */
   private generateDayTimeSlots(date: Date): Array<{
     startTime: Date;
@@ -648,7 +649,7 @@ export class ReservationService {
       endTime: Date;
       label: string;
     }> = [];
-    const baseDate = getDateOnly(date); // استفاده از getDateOnly که timezone تهران استفاده می‌کنه
+    const baseDate = getDateOnly(date); // Use getDateOnly which uses Tehran timezone
 
     for (let hour = 0; hour < 24; hour++) {
       for (let minute = 0; minute < 60; minute += 30) {
@@ -674,53 +675,53 @@ export class ReservationService {
   }
 
   /**
-   * جستجوی گیم‌نت‌های باز بر اساس query parameters (سازگار با فرانت)
-   * نسخه بهینه‌شده با استفاده از optimized query
+   * Search open gaming cafes based on query parameters (frontend compatible)
+   * Optimized version using optimized query
    */
   async searchOpenGamenets(query: SearchAvailableGamenetQueryDto) {
-    // استفاده از نسخه بهینه‌شده
+    // Use optimized version
     const useOptimizedVersion = process.env.USE_OPTIMIZED_SEARCH !== 'false';
 
     if (useOptimizedVersion) {
       return this.searchOpenGamenetsOptimized(query);
     }
 
-    // نسخه قدیمی (برای مقایسه)
+    // Legacy version (for comparison)
     return this.searchOpenGamenetsLegacy(query);
   }
 
   /**
-   * نسخه بهینه‌شده جستجوی گیم‌نت‌های باز
-   * این نسخه از Raw SQL یکپارچه استفاده می‌کند و N+1 Problem ندارد
+   * Optimized version of searching open gaming cafes
+   * This version uses unified Raw SQL and avoids N+1 Problem
    */
   private async searchOpenGamenetsOptimized(query: SearchAvailableGamenetQueryDto) {
 
-    // Validation تاریخ و زمان (مشابه نسخه قبلی)
+    // Validate date and time (similar to previous version)
     if (query.date && !isValidJalaliDateFormat(query.date)) {
       throw new BadRequestException(
-        'فرمت تاریخ نامعتبر است. فرمت صحیح: YYYY/MM/DD',
+        'Invalid date format. Correct format: YYYY/MM/DD',
       );
     }
 
     if (query.startTime && !isValidTimeFormat(query.startTime)) {
       throw new BadRequestException(
-        'فرمت ساعت شروع نامعتبر است. فرمت صحیح: HH:mm',
+        'Invalid start time format. Correct format: HH:mm',
       );
     }
 
     if (query.endTime && !isValidTimeFormat(query.endTime)) {
       throw new BadRequestException(
-        'فرمت ساعت پایان نامعتبر است. فرمت صحیح: HH:mm',
+        'Invalid end time format. Correct format: HH:mm',
       );
     }
 
     if ((query.startTime || query.endTime) && !query.date) {
       throw new BadRequestException(
-        'برای تعیین بازه زمانی، باید تاریخ نیز مشخص شود.',
+        'To specify time range, date must also be specified.',
       );
     }
 
-    // تبدیل تاریخ و زمان
+    // Convert date and time
     let reservedDate: Date;
     let startDateTime: Date | null = null;
     let endDateTime: Date | null = null;
@@ -737,22 +738,20 @@ export class ReservationService {
           endDateTime = jalaliDateTimeToGregorian(query.date, query.endTime);
         }
       } catch (error) {
-        Logger.error('خطا در تبدیل تاریخ:', error);
-        throw new BadRequestException(`خطا در تبدیل تاریخ: ${error.message}`);
+        Logger.error('Error converting date:', error);
+        throw new BadRequestException(`Error converting date: ${error.message}`);
       }
     } else {
       reservedDate = new Date();
     }
 
-    // محاسبه bounding box
+    // Calculate bounding box
     const bbox = calculateBoundingBox(
       { latitude: query.latitude, longitude: query.longitude },
       query.radiusKm,
     );
 
-    const limit = query.limit || 20;
-
-    // استفاده از query بهینه‌شده
+    // Use optimized query
     const organizations = await this.searchService.searchOrganizationsWithStationsAndReservations({
       bbox,
       latitude: query.latitude,
@@ -762,14 +761,13 @@ export class ReservationService {
       gameId: query.gameId,
       playerCount: query.playerCount,
       reservedDate: getDateOnly(reservedDate),
-      limit,
     });
 
-    // محاسبه Iranian day of week یکبار
+    // Calculate Iranian day of week once
     const jsDayOfWeek = reservedDate.getDay();
     const iranianDayOfWeek = (jsDayOfWeek + 1) % 7;
 
-    // دریافت working hours برای همه organizations یکجا (batch)
+    // Get working hours for all organizations at once (batch)
     const orgIds = organizations.map((o) => o.id);
     const workingHoursMap = await this.searchService.getWorkingHoursBatch(
       orgIds,
@@ -777,38 +775,38 @@ export class ReservationService {
     );
     const allWorkingHoursMap = await this.searchService.getAllWorkingHoursBatch(orgIds);
 
-    // پردازش نتایج
+        // Process results
     const results = await Promise.all(
       organizations.map(async (org) => {
 
-        // Parse stations (JSON از query)
+        // Parse stations (JSON from query)
         let stations = Array.isArray(org.stations) ? org.stations : [];
 
-        // فیلتر استیشن‌های خالی
+        // Filter empty stations
         stations = stations.filter((s: any) => s.id);
 
         if (stations.length === 0) {
           return null;
         }
 
-        // محاسبه available slots برای هر استیشن
+        // Calculate available slots for each station
         const stationsWithSlots = stations.map((station: any) => {
           let availableSlots: any[] = [];
 
           if (reservedDate) {
-            // Parse reservations از JSON
+            // Parse reservations from JSON
             const reservations = Array.isArray(station.reservations) ? station.reservations : [];
 
-            // تبدیل string dates به Date objects
+            // Convert string dates to Date objects
             const parsedReservations = reservations.map((r: any) => ({
               startTime: new Date(r.startTime),
               endTime: new Date(r.endTime),
             }));
 
-            // تولید تمام time slots
+            // Generate all time slots
             const allSlots = this.generateDayTimeSlots(reservedDate);
 
-            // فیلتر slot های موجود
+            // Filter available slots
             const available = allSlots.filter((slot) => {
               return !parsedReservations.some((reservation: any) => {
                 return (
@@ -818,7 +816,7 @@ export class ReservationService {
               });
             });
 
-            // چک کردن بازه زمانی مشخص شده
+            // Check specified time range
             if (startDateTime && endDateTime) {
               const reqStart = startDateTime.getTime();
               const reqEnd = endDateTime.getTime();
@@ -844,11 +842,11 @@ export class ReservationService {
               }
 
               if (!allSlotsAvailable) {
-                return null; // استیشن در بازه زمانی موجود نیست
+                return null; // Station not available in the specified time range
               }
             }
 
-            // فرمت کردن slots
+            // Format slots
             availableSlots = available.map((slot) => {
               const formatTime = (d: Date) =>
                 `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
@@ -874,7 +872,7 @@ export class ReservationService {
           return null;
         }
 
-        // چک کردن working hours
+        // Check working hours
         const todayWorkingHours = workingHoursMap.get(org.id);
         let isOpen = true;
 
@@ -896,8 +894,8 @@ export class ReservationService {
           isOpen = false;
         }
 
-        // ساخت workingHours و workingDays
-        const dayNames = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'];
+        // Build workingHours and workingDays
+        const dayNames = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
         const allWorkingHours = allWorkingHoursMap.get(org.id) || [];
 
         const workingDays = dayNames.map((name, index) => {
@@ -913,10 +911,10 @@ export class ReservationService {
         let todayHours: any = null;
         if (todayWorkingHours) {
           if (todayWorkingHours.isClosed) {
-            summary = 'تعطیل';
+            summary = 'Closed';
             todayHours = { startTime: null, endTime: null, is24Hours: false, isClosed: true };
           } else if (todayWorkingHours.is24Hours) {
-            summary = '24 ساعته';
+            summary = '24 Hours';
             todayHours = { startTime: '00:00', endTime: '24:00', is24Hours: true, isClosed: false };
           } else if (todayWorkingHours.startTime && todayWorkingHours.endTime) {
             summary = `${todayWorkingHours.startTime} - ${todayWorkingHours.endTime}`;
@@ -928,11 +926,11 @@ export class ReservationService {
             };
           }
         } else {
-          summary = '24 ساعته';
+          summary = '24 Hours';
           todayHours = { startTime: '00:00', endTime: '24:00', is24Hours: true, isClosed: false };
         }
 
-        // استخراج consoles
+        // Extract consoles
         const consoleMap = new Map();
         stations.forEach((s: any) => {
           if (s.consoleId && s.consoleName) {
@@ -941,11 +939,12 @@ export class ReservationService {
         });
         const uniqueConsoles = Array.from(consoleMap.values()).sort((a, b) => a.id - b.id);
 
-        // تبدیل فاصله به متر
+        // Convert distance to meters
         const distanceInMeters = Math.round(org.distance * 1000);
 
         return {
           id: org.id,
+          username: org.username || null,
           name: org.name,
           logoImage: org.logoImage || null,
           indexImage: org.indexImage || null,
@@ -961,11 +960,11 @@ export class ReservationService {
       }),
     );
 
-    // حذف null ها
+    // Remove nulls
     let validResults = results.filter((r) => r !== null);
 
 
-    // فیلتر یا مرتب‌سازی بر اساس isOpen
+    // Filter or sort by isOpen
     if (startDateTime && endDateTime) {
       const beforeFilter = validResults.length;
       validResults = validResults.filter((org) => org.isOpen === true);
@@ -984,45 +983,44 @@ export class ReservationService {
       meta: {
         total: validResults.length,
         page: 1,
-        limit: query.limit || 20,
       },
     };
   }
 
   /**
-   * نسخه قدیمی جستجوی گیم‌نت‌های باز (برای مقایسه و fallback)
+   * Legacy version of searching open gaming cafes (for comparison and fallback)
    */
   private async searchOpenGamenetsLegacy(query: SearchAvailableGamenetQueryDto) {
 
-    // Validation تاریخ و زمان
+    // Validate date and time
     if (query.date && !isValidJalaliDateFormat(query.date)) {
       throw new BadRequestException(
-        'فرمت تاریخ نامعتبر است. فرمت صحیح: YYYY/MM/DD',
+        'Invalid date format. Correct format: YYYY/MM/DD',
       );
     }
 
     if (query.startTime && !isValidTimeFormat(query.startTime)) {
       throw new BadRequestException(
-        'فرمت ساعت شروع نامعتبر است. فرمت صحیح: HH:mm',
+        'Invalid start time format. Correct format: HH:mm',
       );
     }
 
     if (query.endTime && !isValidTimeFormat(query.endTime)) {
       throw new BadRequestException(
-        'فرمت ساعت پایان نامعتبر است. فرمت صحیح: HH:mm',
+        'Invalid end time format. Correct format: HH:mm',
       );
     }
 
-    // اگر startTime یا endTime داده شده، date هم باید داده شده باشد
-    // (چون نمی‌تونیم زمان رو بدون تاریخ چک کنیم)
+    // If startTime or endTime is provided, date must also be provided
+    // (because we cannot check time without date)
     if ((query.startTime || query.endTime) && !query.date) {
       throw new BadRequestException(
-        'برای تعیین بازه زمانی، باید تاریخ نیز مشخص شود.',
+        'To specify time range, date must also be specified.',
       );
     }
 
-    // تبدیل تاریخ شمسی به میلادی
-    // اگر تاریخ ارسال نشده، از امروز استفاده می‌کنیم
+    // Convert Jalali date to Gregorian
+    // If date is not sent, use today
     let reservedDate: Date;
     let startDateTime: Date | null = null;
     let endDateTime: Date | null = null;
@@ -1042,25 +1040,23 @@ export class ReservationService {
           endDateTime = jalaliDateTimeToGregorian(query.date, query.endTime);
         }
       } catch (error) {
-        Logger.error('خطا در تبدیل تاریخ:', error);
+        Logger.error('Error converting date:', error);
         throw new BadRequestException(
-          `خطا در تبدیل تاریخ: ${error.message}`,
+          `Error converting date: ${error.message}`,
         );
       }
     } else {
-      // اگر تاریخ ارسال نشده، از امروز استفاده می‌کنیم
+      // If date is not sent, use today
       reservedDate = new Date();
     }
 
-    // محاسبه bounding box
+    // Calculate bounding box
     const bbox = calculateBoundingBox(
       { latitude: query.latitude, longitude: query.longitude },
       query.radiusKm,
     );
 
-    const limit = query.limit || 20;
-
-    // جستجوی گیم‌نت‌ها
+    // Search gaming cafes
     const queryConditions: any[] = [
       Prisma.sql`o.latitude BETWEEN ${bbox.minLat} AND ${bbox.maxLat}`,
       Prisma.sql`o.longitude BETWEEN ${bbox.minLon} AND ${bbox.maxLon}`,
@@ -1068,7 +1064,7 @@ export class ReservationService {
       Prisma.sql`o.longitude IS NOT NULL`,
     ];
 
-    // محاسبه فاصله
+    // Calculate distance
     const distanceCalc = Prisma.sql`(
       6371 * acos(
         cos(radians(${query.latitude})) * 
@@ -1085,6 +1081,7 @@ export class ReservationService {
           o.id,
           o.uuid,
           o.name,
+          o.username,
           o.address,
           o."phoneNumber",
           o.province,
@@ -1099,15 +1096,14 @@ export class ReservationService {
       ) AS orgs
       WHERE distance < ${query.radiusKm}
       ORDER BY distance
-      LIMIT ${limit}
     `;
 
     const organizations = await this.prisma.$queryRaw<any[]>(baseQuery);
 
-    // برای هر organization، دریافت استیشن‌ها و availableSlots
+    // For each organization, get stations and availableSlots
     const results = await Promise.all(
       organizations.map(async (org) => {
-        // شرایط فیلتر استیشن‌ها
+        // Station filter conditions
         const stationWhere: any = {
           organizationId: org.id,
           isActive: true,
@@ -1123,7 +1119,7 @@ export class ReservationService {
           stationWhere.capacity = { gte: query.playerCount };
         }
 
-        // دریافت استیشن‌ها
+        // Get stations
         let stations = await this.prisma.station.findMany({
           where: stationWhere,
           include: {
@@ -1166,7 +1162,7 @@ export class ReservationService {
           },
         });
 
-        // اگر gameId مشخص شده، فقط استیشن‌هایی که این بازی رو دارند
+        // If gameId is specified, only stations that have this game
         if (query.gameId) {
           const beforeFilter = stations.length;
           stations = stations.filter(
@@ -1175,7 +1171,7 @@ export class ReservationService {
         }
 
 
-        // برای هر استیشن، دریافت availableSlots (اگر date مشخص شده)
+        // For each station, get availableSlots (if date is specified)
         const stationsWithSlots = await Promise.all(
           stations.map(async (station) => {
             let availableSlots: any[] = [];
@@ -1183,7 +1179,7 @@ export class ReservationService {
             if (reservedDate) {
               const dateOnly = getDateOnly(reservedDate);
 
-              // دریافت تمام رزروها
+              // Get all reservations
               const reservations = await this.prisma.reservation.findMany({
                 where: {
                   stationId: station.id,
@@ -1197,10 +1193,10 @@ export class ReservationService {
               });
 
 
-              // تولید تمام time slots
+              // Generate all time slots
               const allSlots = this.generateDayTimeSlots(reservedDate);
 
-              // فیلتر slot های موجود
+              // Filter available slots
               const available = allSlots.filter((slot) => {
                 return !reservations.some((reservation) => {
                   return (
@@ -1211,17 +1207,17 @@ export class ReservationService {
               });
 
 
-              // اگر بازه زمانی مشخص شده، چک کنیم که تمام slot های این بازه available باشند
+              // If time range is specified, check that all slots in this range are available
               if (startDateTime && endDateTime) {
                 
-                // محاسبه تعداد slot های مورد نیاز (هر slot 30 دقیقه است)
+                // Calculate number of required slots (each slot is 30 minutes)
                 const reqStart = startDateTime.getTime();
                 const reqEnd = endDateTime.getTime();
-                const slotDuration = 30 * 60 * 1000; // 30 دقیقه به میلی‌ثانیه
+                const slotDuration = 30 * 60 * 1000; // 30 minutes in milliseconds
                 const requiredSlots = Math.floor((reqEnd - reqStart) / slotDuration);
 
 
-                // چک کردن که آیا تمام slot های این بازه موجود هستند
+                // Check if all slots in this range are available
                 let allSlotsAvailable = true;
                 const requiredSlotTimes: Date[] = [];
 
@@ -1245,13 +1241,13 @@ export class ReservationService {
                 }
 
 
-                // اگر تمام slot های بازه زمانی موجود نیستند، این استیشن رو نگه نمی‌داریم
+                // If all slots in the time range are not available, we don't keep this station
                 if (!allSlotsAvailable) {
                   return null;
                 }
               }
 
-              // فرمت کردن slots (با timezone تهران)
+              // Format slots (with Tehran timezone)
               availableSlots = available.map((slot) => {
                 const formatTime = (d: Date) =>
                   `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
@@ -1263,7 +1259,7 @@ export class ReservationService {
               });
             }
 
-            // فرمت pricings
+            // Format pricings
             const pricings = station.pricings.map((pricing) => ({
               playerCount: pricing.playerCount,
               price: pricing.price,
@@ -1288,38 +1284,38 @@ export class ReservationService {
           }),
         );
 
-        // حذف استیشن‌های null (که available نبودند)
+        // Remove null stations (that were not available)
         const validStations = stationsWithSlots.filter(
           (station) => station !== null,
         );
 
 
-        // اگر هیچ استیشنی موجود نیست، این organization رو برنمی‌گردونیم
+        // If no stations are available, don't return this organization
         if (validStations.length === 0) {
           return null;
         }
 
-        // دریافت working hours و working days
+        // Get working hours and working days
         const workingHoursData = await this.getOrganizationWorkingHours(
           org.id,
           reservedDate,
         );
 
-        // چک کردن working hours برای تعیین isOpen
-        // اگر startTime مشخص شده، از اون استفاده می‌کنیم (چک روز + ساعت)
-        // در غیر این صورت، فقط روز هفته رو چک می‌کنیم (چک روز فقط)
+        // Check working hours to determine isOpen
+        // If startTime is specified, use it (check day + time)
+        // Otherwise, only check day of week (check day only)
         let isOpen = true;
 
 
         if (startDateTime) {
-          // اگر زمان مشخص شده، هم روز و هم ساعت رو چک می‌کنیم
+          // If time is specified, check both day and time
           isOpen = await this.checkOrganizationWorkingHours(
             org.id,
             reservedDate,
             startDateTime,
           );
         } else {
-          // اگر زمان مشخص نشده، فقط روز هفته رو چک می‌کنیم
+          // If time is not specified, only check day of week
           isOpen = await this.checkOrganizationWorkingHoursByDayOnly(
             org.id,
             reservedDate,
@@ -1327,22 +1323,23 @@ export class ReservationService {
         }
 
 
-        // استخراج consoles از stations
-        // باید از stations اصلی استفاده کنیم نه validStations (چون validStations ممکنه فیلتر شده باشه)
+        // Extract consoles from stations
+        // Must use original stations, not validStations (because validStations may be filtered)
         const uniqueConsoles = this.extractConsolesFromStations(stations);
 
 
-        // تبدیل فاصله از کیلومتر به متر
+        // Convert distance from kilometers to meters
         const distanceInMeters = Math.round(org.distance * 1000);
 
         return {
           id: org.id,
+          username: org.username || null,
           name: org.name,
           logoImage: org.logoImage || null,
           indexImage: org.indexImage || null,
-          rating: null, // فعلاً null - بعداً از reviews محاسبه می‌شه
-          distance: distanceInMeters, // فاصله به متر
-          distanceUnit: 'm', // متر
+          rating: null, // Currently null - will be calculated from reviews later
+          distance: distanceInMeters, // Distance in meters
+          distanceUnit: 'm', // meters
           isOpen,
           workingHours: workingHoursData.workingHours,
           workingDays: workingHoursData.workingDays,
@@ -1358,24 +1355,24 @@ export class ReservationService {
       }),
     );
 
-    // حذف organization های null
+    // Remove null organizations
     let validResults = results.filter((result) => result !== null);
 
 
-    // اگر تاریخ و ساعت داده شده، فقط گیم‌نت‌های باز رو نشون بده
+    // If date and time are given, only show open gaming cafes
     if (startDateTime && endDateTime) {
       const beforeFilter = validResults.length;
       validResults = validResults.filter((org) => org.isOpen === true);
     } else {
-      // اگر تاریخ و ساعت داده نشده، همه رو نشون بده ولی مرتب‌سازی کن
-      // اول بازها (نزدیک‌ترین اول)، بعد بسته‌ها
+      // If date and time are not given, show all but sort
+      // First open ones (closest first), then closed ones
 
       validResults.sort((a, b) => {
-        // اول بر اساس isOpen (بازها اول)
+        // First by isOpen (open ones first)
         if (a.isOpen !== b.isOpen) {
-          return a.isOpen ? -1 : 1; // true (باز) اول میاد
+          return a.isOpen ? -1 : 1; // true (open) comes first
         }
-        // اگر هر دو باز یا هر دو بسته هستند، بر اساس فاصله مرتب کن
+        // If both are open or both are closed, sort by distance
         return a.distance - b.distance;
       });
     }
@@ -1385,25 +1382,24 @@ export class ReservationService {
       organizations: validResults,
       meta: {
         total: validResults.length,
-        page: 1, // فعلاً pagination نداریم
-        limit: query.limit || 20,
+        page: 1, // Currently no pagination
       },
     };
   }
 
   /**
-   * چک کردن working hours یک organization
+   * Check working hours of an organization
    */
   private async checkOrganizationWorkingHours(
     organizationId: number,
     date: Date,
     time: Date,
   ): Promise<boolean> {
-    // دریافت روز هفته
-    // در JS: 0=یکشنبه, 1=دوشنبه, 2=سه‌شنبه, 3=چهارشنبه, 4=پنج‌شنبه, 5=جمعه, 6=شنبه
-    // در سیستم ایرانی: 0=شنبه, 1=یکشنبه, 2=دوشنبه, 3=سه‌شنبه, 4=چهارشنبه, 5=پنج‌شنبه, 6=جمعه
+    // Get day of week
+    // In JS: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday
+    // In Iranian system: 0=Saturday, 1=Sunday, 2=Monday, 3=Tuesday, 4=Wednesday, 5=Thursday, 6=Friday
     const jsDayOfWeek = date.getDay();
-    // تبدیل: JS 0→1, 1→2, 2→3, 3→4, 4→5, 5→6, 6→0
+    // Convert: JS 0→1, 1→2, 2→3, 3→4, 4→5, 5→6, 6→0
     const iranianDayOfWeek = (jsDayOfWeek + 1) % 7;
 
     const workingHours =
@@ -1417,18 +1413,18 @@ export class ReservationService {
       });
 
     if (!workingHours) {
-      return true; // اگر تعریف نشده، فرض می‌کنیم باز است
+      return true; // If not defined, assume it's open
     }
 
     if (workingHours.isClosed) {
-      return false; // تعطیل است
+      return false; // Closed
     }
 
     if (workingHours.is24Hours) {
-      return true; // 24 ساعته باز است
+      return true; // Open 24 hours
     }
 
-    // چک کردن بازه زمانی
+    // Check time range
     if (workingHours.startTime && workingHours.endTime) {
       const [startHour, startMinute] = workingHours.startTime
         .split(':')
@@ -1456,17 +1452,17 @@ export class ReservationService {
   }
 
   /**
-   * چک کردن working hours یک organization فقط بر اساس روز هفته (بدون ساعت)
+   * Check working hours of an organization only based on day of week (without time)
    */
   private async checkOrganizationWorkingHoursByDayOnly(
     organizationId: number,
     date: Date,
   ): Promise<boolean> {
-    // دریافت روز هفته
-    // در JS: 0=یکشنبه, 1=دوشنبه, 2=سه‌شنبه, 3=چهارشنبه, 4=پنج‌شنبه, 5=جمعه, 6=شنبه
-    // در سیستم ایرانی: 0=شنبه, 1=یکشنبه, 2=دوشنبه, 3=سه‌شنبه, 4=چهارشنبه, 5=پنج‌شنبه, 6=جمعه
+    // Get day of week
+    // In JS: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday
+    // In Iranian system: 0=Saturday, 1=Sunday, 2=Monday, 3=Tuesday, 4=Wednesday, 5=Thursday, 6=Friday
     const jsDayOfWeek = date.getDay();
-    // تبدیل: JS 0→1, 1→2, 2→3, 3→4, 4→5, 5→6, 6→0
+    // Convert: JS 0→1, 1→2, 2→3, 3→4, 4→5, 5→6, 6→0
     const iranianDayOfWeek = (jsDayOfWeek + 1) % 7;
 
     const workingHours =
@@ -1480,29 +1476,29 @@ export class ReservationService {
       });
 
     if (!workingHours) {
-      return true; // اگر تعریف نشده، فرض می‌کنیم باز است
+      return true; // If not defined, assume it's open
     }
 
     if (workingHours.isClosed) {
-      return false; // تعطیل است
+      return false; // Closed
     }
 
-    // اگر تعطیل نیست، باز است (بدون چک ساعت)
+    // If not closed, it's open (without checking time)
     return true;
   }
 
   /**
-   * دریافت working hours و working days یک organization
+   * Get working hours and working days of an organization
    */
   private async getOrganizationWorkingHours(organizationId: number, date: Date) {
-    // دریافت روز هفته
-    // در JS: 0=یکشنبه, 1=دوشنبه, 2=سه‌شنبه, 3=چهارشنبه, 4=پنج‌شنبه, 5=جمعه, 6=شنبه
-    // در سیستم ایرانی: 0=شنبه, 1=یکشنبه, 2=دوشنبه, 3=سه‌شنبه, 4=چهارشنبه, 5=پنج‌شنبه, 6=جمعه
+    // Get day of week
+    // In JS: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday
+    // In Iranian system: 0=Saturday, 1=Sunday, 2=Monday, 3=Tuesday, 4=Wednesday, 5=Thursday, 6=Friday
     const jsDayOfWeek = date.getDay();
-    // تبدیل: JS 0→1, 1→2, 2→3, 3→4, 4→5, 5→6, 6→0
+    // Convert: JS 0→1, 1→2, 2→3, 3→4, 4→5, 5→6, 6→0
     const iranianDayOfWeek = (jsDayOfWeek + 1) % 7;
 
-    // دریافت working hours برای امروز
+    // Get working hours for today
     const todayWorkingHours =
       await this.prisma.organizationWorkingHours.findUnique({
         where: {
@@ -1513,25 +1509,25 @@ export class ReservationService {
         },
       });
 
-    // دریافت تمام working hours
+    // Get all working hours
     const allWorkingHours =
       await this.prisma.organizationWorkingHours.findMany({
         where: { organizationId },
         orderBy: { dayOfWeek: 'asc' },
       });
 
-    // نام روزهای هفته
-    const dayNames = [
-      'شنبه',
-      'یکشنبه',
-      'دوشنبه',
-      'سه‌شنبه',
-      'چهارشنبه',
-      'پنج‌شنبه',
-      'جمعه',
+    // Day names of week
+        const dayNames = [
+      'Saturday',
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
     ];
 
-    // ساخت working days (7 روز هفته)
+    // Build working days (7 days of week)
     const workingDays: Array<{
       dayOfWeek: number;
       dayName: string;
@@ -1542,11 +1538,11 @@ export class ReservationService {
       workingDays.push({
         dayOfWeek: i,
         dayName: dayNames[i],
-        isWorking: wh ? !wh.isClosed : true, // اگر تعریف نشده، فرض می‌کنیم باز است
+        isWorking: wh ? !wh.isClosed : true, // If not defined, assume it's open
       });
     }
 
-    // ساخت working hours برای today
+    // Build working hours for today
     let todayHours: {
       startTime: string | null;
       endTime: string | null;
@@ -1557,7 +1553,7 @@ export class ReservationService {
 
     if (todayWorkingHours) {
       if (todayWorkingHours.isClosed) {
-        summary = 'تعطیل';
+        summary = 'Closed';
         todayHours = {
           startTime: null,
           endTime: null,
@@ -1565,7 +1561,7 @@ export class ReservationService {
           isClosed: true,
         };
       } else if (todayWorkingHours.is24Hours) {
-        summary = '24 ساعته';
+        summary = '24 Hours';
         todayHours = {
           startTime: '00:00',
           endTime: '24:00',
@@ -1585,8 +1581,8 @@ export class ReservationService {
         };
       }
     } else {
-      // اگر تعریف نشده، فرض می‌کنیم 24 ساعته باز است
-      summary = '24 ساعته';
+      // If not defined, assume it's open 24 hours
+      summary = '24 Hours';
       todayHours = {
         startTime: '00:00',
         endTime: '24:00',
@@ -1605,7 +1601,7 @@ export class ReservationService {
   }
 
   /**
-   * استخراج consoles منحصر به فرد از stations
+   * Extract unique consoles from stations
    */
   private extractConsolesFromStations(stations: any[]): Array<{
     id: number;
@@ -1627,6 +1623,112 @@ export class ReservationService {
     const result = Array.from(consoleMap.values()).sort((a, b) => a.id - b.id);
 
     return result;
+  }
+
+  /**
+   * Search available stations - optimized endpoint for high-traffic
+   * This method directly returns available stations without requiring geographical coordinates
+   *
+   * @param dto Search data including Jalali date, time and filters
+   * @returns List of available stations with complete organization information
+   */
+  async searchAvailableStations(dto: any) {
+    // Validation 1: Validate Jalali date format
+    if (!isValidJalaliDateFormat(dto.date)) {
+      throw new BadRequestException(
+        'Invalid date format. Correct format: YYYY/MM/DD (e.g. 1403/09/15)',
+      );
+    }
+
+    // Validation 2: Validate time format
+    if (!isValidTimeFormat(dto.startTime)) {
+      throw new BadRequestException(
+        'Invalid start time format. Correct format: HH:mm (e.g. 14:30)',
+      );
+    }
+
+    if (!isValidTimeFormat(dto.endTime)) {
+      throw new BadRequestException(
+        'Invalid end time format. Correct format: HH:mm (e.g. 18:00)',
+      );
+    }
+
+    // Validation 3: Check logical time range
+    if (dto.startTime >= dto.endTime) {
+      throw new BadRequestException(
+        'Start time must be before end time.',
+      );
+    }
+
+    // Convert Jalali date to Gregorian
+    let gregorianDate: Date;
+    try {
+      gregorianDate = jalaliToGregorian(dto.date);
+    } catch (error) {
+      throw new BadRequestException('Invalid date entered.');
+    }
+
+    // Combine date and start time to check it's not in the past
+    const startDateTime = jalaliDateTimeToGregorian(
+      dto.date,
+      dto.startTime,
+    );
+
+    // Validation 4: Check that time is not in the past (with 10-minute tolerance)
+    if (isPastTime(startDateTime, 10)) {
+      throw new BadRequestException(
+        'Cannot search for past time.',
+      );
+    }
+
+    // Call optimized method for search
+    const perfStartTime = Date.now();
+    const rawResults = await this.searchService.searchAvailableStationsOptimized(
+      {
+        username: dto.username,
+        consoleId: dto.consoleId,
+        gameId: dto.gameId,
+        playerCount: dto.playerCount,
+        reservedDate: gregorianDate,
+        startTime: dto.startTime,
+        endTime: dto.endTime,
+      },
+    );
+    const searchTime = Date.now() - perfStartTime;
+
+    // Transform raw results to stations array
+    const stations = rawResults.map((row: any) => ({
+      id: row.station_id,
+      title: row.station_title,
+      consoleId: row.consoleId,
+      consoleName: row.console_name,
+      consoleCategory: row.console_category,
+      capacity: row.capacity,
+      status: row.status,
+      isAvailable: row.is_available,
+      pricings: row.pricings,
+      games: row.games,
+    }));
+
+    console.log(
+      `[PERFORMANCE] searchAvailableStations completed in ${searchTime}ms - Found ${stations.length} available stations`,
+    );
+
+    return {
+      stations,
+      meta: {
+        total: stations.length,
+        searchParams: {
+          username: dto.username,
+          date: dto.date,
+          startTime: dto.startTime,
+          endTime: dto.endTime,
+          consoleId: dto.consoleId,
+          gameId: dto.gameId,
+          playerCount: dto.playerCount,
+        },
+      },
+    };
   }
 }
 
