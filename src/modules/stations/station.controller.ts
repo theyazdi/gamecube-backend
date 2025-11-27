@@ -28,7 +28,7 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { StationService } from './station.service';
-import { Station } from '../../generated/client';
+import { Station, Game } from '../../generated/client';
 import {
   CreateStationDto,
   UpdateStationDto,
@@ -208,6 +208,55 @@ export class StationController {
     }
 
     return this.stationService.searchStations(filters);
+  }
+
+  @Get(':id/games')
+  @Roles(UserRole.USER, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Get games available on a station',
+    description: 'Retrieves the list of games available on a specific gaming station (device)',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Station ID',
+    type: 'number',
+    example: 1,
+  })
+  @ApiOkResponse({
+    description: 'Games retrieved successfully',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'number' },
+          title: { type: 'string' },
+          description: { type: 'string', nullable: true },
+          coverImage: { type: 'string', nullable: true },
+          category: { type: 'array', items: { type: 'string' } },
+          releaseYear: { type: 'number' },
+          displayPriority: { type: 'number' },
+          isAccepted: { type: 'boolean' },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' },
+        },
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'Station not found',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'Station with ID 1 not found',
+        error: 'Not Found',
+      },
+    },
+  })
+  async getStationGames(
+    @Param('id', ParseIntPipe) stationId: number,
+  ): Promise<Game[]> {
+    return this.stationService.getStationGames(stationId);
   }
 
   @Get(':id')

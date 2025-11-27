@@ -739,4 +739,41 @@ export class StationService {
     const minutes = date.getMinutes().toString().padStart(2, '0');
     return `${hours}:${minutes}`;
   }
+
+  /**
+   * Get games for a specific station
+   * Returns list of games available on the station
+   */
+  async getStationGames(stationId: number) {
+    // Check if station exists and is not deleted
+    const station = await this.prisma.station.findFirst({
+      where: {
+        id: stationId,
+        deletedAt: null,
+      },
+      include: {
+        stationGames: {
+          include: {
+            game: true,
+          },
+        },
+      },
+    });
+
+    if (!station) {
+      throw new NotFoundException(`Station with ID ${stationId} not found`);
+    }
+
+    // Return only accepted games
+    return station.stationGames
+      .map(sg => sg.game)
+      .filter(game => game.isAccepted)
+      .sort((a, b) => {
+        // Sort by displayPriority first, then by createdAt
+        if (a.displayPriority !== b.displayPriority) {
+          return a.displayPriority - b.displayPriority;
+        }
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+  }
 }
