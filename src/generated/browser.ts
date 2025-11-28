@@ -76,3 +76,24 @@ export type UserOrganization = Prisma.UserOrganizationModel
  * 
  */
 export type Reservation = Prisma.ReservationModel
+/**
+ * Model Invoice
+ * 
+ */
+export type Invoice = Prisma.InvoiceModel
+/**
+ * Model InvoiceContent
+ * 
+ */
+export type InvoiceContent = Prisma.InvoiceContentModel
+/**
+ * Model Session
+ * 
+ */
+export type Session = Prisma.SessionModel
+/**
+ * Model SystemSettings
+ * System Settings - Global configuration for the application
+ * Currently used for tax settings, can be extended for other settings
+ */
+export type SystemSettings = Prisma.SystemSettingsModel

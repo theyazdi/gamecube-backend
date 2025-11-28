@@ -339,6 +339,7 @@ export type OrganizationWhereInput = {
   managers?: Prisma.UserOrganizationListRelationFilter
   workingHours?: Prisma.OrganizationWorkingHoursListRelationFilter
   reservations?: Prisma.ReservationListRelationFilter
+  sessions?: Prisma.SessionListRelationFilter
 }
 
 export type OrganizationOrderByWithRelationInput = {
@@ -366,6 +367,7 @@ export type OrganizationOrderByWithRelationInput = {
   managers?: Prisma.UserOrganizationOrderByRelationAggregateInput
   workingHours?: Prisma.OrganizationWorkingHoursOrderByRelationAggregateInput
   reservations?: Prisma.ReservationOrderByRelationAggregateInput
+  sessions?: Prisma.SessionOrderByRelationAggregateInput
 }
 
 export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
@@ -396,6 +398,7 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   managers?: Prisma.UserOrganizationListRelationFilter
   workingHours?: Prisma.OrganizationWorkingHoursListRelationFilter
   reservations?: Prisma.ReservationListRelationFilter
+  sessions?: Prisma.SessionListRelationFilter
 }, "id" | "uuid" | "username">
 
 export type OrganizationOrderByWithAggregationInput = {
@@ -476,6 +479,7 @@ export type OrganizationCreateInput = {
   managers?: Prisma.UserOrganizationCreateNestedManyWithoutOrganizationInput
   workingHours?: Prisma.OrganizationWorkingHoursCreateNestedManyWithoutOrganizationInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutOrganizationInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateInput = {
@@ -503,6 +507,7 @@ export type OrganizationUncheckedCreateInput = {
   managers?: Prisma.UserOrganizationUncheckedCreateNestedManyWithoutOrganizationInput
   workingHours?: Prisma.OrganizationWorkingHoursUncheckedCreateNestedManyWithoutOrganizationInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutOrganizationInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUpdateInput = {
@@ -529,6 +534,7 @@ export type OrganizationUpdateInput = {
   managers?: Prisma.UserOrganizationUpdateManyWithoutOrganizationNestedInput
   workingHours?: Prisma.OrganizationWorkingHoursUpdateManyWithoutOrganizationNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutOrganizationNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateInput = {
@@ -556,6 +562,7 @@ export type OrganizationUncheckedUpdateInput = {
   managers?: Prisma.UserOrganizationUncheckedUpdateManyWithoutOrganizationNestedInput
   workingHours?: Prisma.OrganizationWorkingHoursUncheckedUpdateManyWithoutOrganizationNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutOrganizationNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateManyInput = {
@@ -790,6 +797,20 @@ export type OrganizationUpdateOneRequiredWithoutReservationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutReservationsInput, Prisma.OrganizationUpdateWithoutReservationsInput>, Prisma.OrganizationUncheckedUpdateWithoutReservationsInput>
 }
 
+export type OrganizationCreateNestedOneWithoutSessionsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutSessionsInput, Prisma.OrganizationUncheckedCreateWithoutSessionsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutSessionsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutSessionsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutSessionsInput, Prisma.OrganizationUncheckedCreateWithoutSessionsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutSessionsInput
+  upsert?: Prisma.OrganizationUpsertWithoutSessionsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutSessionsInput, Prisma.OrganizationUpdateWithoutSessionsInput>, Prisma.OrganizationUncheckedUpdateWithoutSessionsInput>
+}
+
 export type OrganizationCreateWithoutWorkingHoursInput = {
   uuid?: string
   name: string
@@ -813,6 +834,7 @@ export type OrganizationCreateWithoutWorkingHoursInput = {
   stations?: Prisma.StationCreateNestedManyWithoutOrganizationInput
   managers?: Prisma.UserOrganizationCreateNestedManyWithoutOrganizationInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutOrganizationInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutWorkingHoursInput = {
@@ -839,6 +861,7 @@ export type OrganizationUncheckedCreateWithoutWorkingHoursInput = {
   stations?: Prisma.StationUncheckedCreateNestedManyWithoutOrganizationInput
   managers?: Prisma.UserOrganizationUncheckedCreateNestedManyWithoutOrganizationInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutOrganizationInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutWorkingHoursInput = {
@@ -880,6 +903,7 @@ export type OrganizationUpdateWithoutWorkingHoursInput = {
   stations?: Prisma.StationUpdateManyWithoutOrganizationNestedInput
   managers?: Prisma.UserOrganizationUpdateManyWithoutOrganizationNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutOrganizationNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutWorkingHoursInput = {
@@ -906,6 +930,7 @@ export type OrganizationUncheckedUpdateWithoutWorkingHoursInput = {
   stations?: Prisma.StationUncheckedUpdateManyWithoutOrganizationNestedInput
   managers?: Prisma.UserOrganizationUncheckedUpdateManyWithoutOrganizationNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutOrganizationNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutStationsInput = {
@@ -931,6 +956,7 @@ export type OrganizationCreateWithoutStationsInput = {
   managers?: Prisma.UserOrganizationCreateNestedManyWithoutOrganizationInput
   workingHours?: Prisma.OrganizationWorkingHoursCreateNestedManyWithoutOrganizationInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutOrganizationInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutStationsInput = {
@@ -957,6 +983,7 @@ export type OrganizationUncheckedCreateWithoutStationsInput = {
   managers?: Prisma.UserOrganizationUncheckedCreateNestedManyWithoutOrganizationInput
   workingHours?: Prisma.OrganizationWorkingHoursUncheckedCreateNestedManyWithoutOrganizationInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutOrganizationInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutStationsInput = {
@@ -998,6 +1025,7 @@ export type OrganizationUpdateWithoutStationsInput = {
   managers?: Prisma.UserOrganizationUpdateManyWithoutOrganizationNestedInput
   workingHours?: Prisma.OrganizationWorkingHoursUpdateManyWithoutOrganizationNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutOrganizationNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutStationsInput = {
@@ -1024,6 +1052,7 @@ export type OrganizationUncheckedUpdateWithoutStationsInput = {
   managers?: Prisma.UserOrganizationUncheckedUpdateManyWithoutOrganizationNestedInput
   workingHours?: Prisma.OrganizationWorkingHoursUncheckedUpdateManyWithoutOrganizationNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutOrganizationNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutManagersInput = {
@@ -1049,6 +1078,7 @@ export type OrganizationCreateWithoutManagersInput = {
   stations?: Prisma.StationCreateNestedManyWithoutOrganizationInput
   workingHours?: Prisma.OrganizationWorkingHoursCreateNestedManyWithoutOrganizationInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutOrganizationInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutManagersInput = {
@@ -1075,6 +1105,7 @@ export type OrganizationUncheckedCreateWithoutManagersInput = {
   stations?: Prisma.StationUncheckedCreateNestedManyWithoutOrganizationInput
   workingHours?: Prisma.OrganizationWorkingHoursUncheckedCreateNestedManyWithoutOrganizationInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutOrganizationInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutManagersInput = {
@@ -1116,6 +1147,7 @@ export type OrganizationUpdateWithoutManagersInput = {
   stations?: Prisma.StationUpdateManyWithoutOrganizationNestedInput
   workingHours?: Prisma.OrganizationWorkingHoursUpdateManyWithoutOrganizationNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutOrganizationNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutManagersInput = {
@@ -1142,6 +1174,7 @@ export type OrganizationUncheckedUpdateWithoutManagersInput = {
   stations?: Prisma.StationUncheckedUpdateManyWithoutOrganizationNestedInput
   workingHours?: Prisma.OrganizationWorkingHoursUncheckedUpdateManyWithoutOrganizationNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutOrganizationNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutReservationsInput = {
@@ -1167,6 +1200,7 @@ export type OrganizationCreateWithoutReservationsInput = {
   stations?: Prisma.StationCreateNestedManyWithoutOrganizationInput
   managers?: Prisma.UserOrganizationCreateNestedManyWithoutOrganizationInput
   workingHours?: Prisma.OrganizationWorkingHoursCreateNestedManyWithoutOrganizationInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutReservationsInput = {
@@ -1193,6 +1227,7 @@ export type OrganizationUncheckedCreateWithoutReservationsInput = {
   stations?: Prisma.StationUncheckedCreateNestedManyWithoutOrganizationInput
   managers?: Prisma.UserOrganizationUncheckedCreateNestedManyWithoutOrganizationInput
   workingHours?: Prisma.OrganizationWorkingHoursUncheckedCreateNestedManyWithoutOrganizationInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutReservationsInput = {
@@ -1234,6 +1269,7 @@ export type OrganizationUpdateWithoutReservationsInput = {
   stations?: Prisma.StationUpdateManyWithoutOrganizationNestedInput
   managers?: Prisma.UserOrganizationUpdateManyWithoutOrganizationNestedInput
   workingHours?: Prisma.OrganizationWorkingHoursUpdateManyWithoutOrganizationNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutReservationsInput = {
@@ -1260,6 +1296,129 @@ export type OrganizationUncheckedUpdateWithoutReservationsInput = {
   stations?: Prisma.StationUncheckedUpdateManyWithoutOrganizationNestedInput
   managers?: Prisma.UserOrganizationUncheckedUpdateManyWithoutOrganizationNestedInput
   workingHours?: Prisma.OrganizationWorkingHoursUncheckedUpdateManyWithoutOrganizationNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutSessionsInput = {
+  uuid?: string
+  name: string
+  username?: string | null
+  province: string
+  city: string
+  phoneNumber: string
+  email?: string | null
+  managerPhones?: Prisma.OrganizationCreatemanagerPhonesInput | string[]
+  gallery?: Prisma.OrganizationCreategalleryInput | string[]
+  indexImage?: string | null
+  logoImage?: string | null
+  address?: string | null
+  description?: string | null
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  tfHour?: boolean
+  isCube?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  stations?: Prisma.StationCreateNestedManyWithoutOrganizationInput
+  managers?: Prisma.UserOrganizationCreateNestedManyWithoutOrganizationInput
+  workingHours?: Prisma.OrganizationWorkingHoursCreateNestedManyWithoutOrganizationInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutSessionsInput = {
+  id?: number
+  uuid?: string
+  name: string
+  username?: string | null
+  province: string
+  city: string
+  phoneNumber: string
+  email?: string | null
+  managerPhones?: Prisma.OrganizationCreatemanagerPhonesInput | string[]
+  gallery?: Prisma.OrganizationCreategalleryInput | string[]
+  indexImage?: string | null
+  logoImage?: string | null
+  address?: string | null
+  description?: string | null
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  tfHour?: boolean
+  isCube?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  stations?: Prisma.StationUncheckedCreateNestedManyWithoutOrganizationInput
+  managers?: Prisma.UserOrganizationUncheckedCreateNestedManyWithoutOrganizationInput
+  workingHours?: Prisma.OrganizationWorkingHoursUncheckedCreateNestedManyWithoutOrganizationInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutSessionsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutSessionsInput, Prisma.OrganizationUncheckedCreateWithoutSessionsInput>
+}
+
+export type OrganizationUpsertWithoutSessionsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutSessionsInput, Prisma.OrganizationUncheckedUpdateWithoutSessionsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutSessionsInput, Prisma.OrganizationUncheckedCreateWithoutSessionsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutSessionsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutSessionsInput, Prisma.OrganizationUncheckedUpdateWithoutSessionsInput>
+}
+
+export type OrganizationUpdateWithoutSessionsInput = {
+  uuid?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  province?: Prisma.StringFieldUpdateOperationsInput | string
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerPhones?: Prisma.OrganizationUpdatemanagerPhonesInput | string[]
+  gallery?: Prisma.OrganizationUpdategalleryInput | string[]
+  indexImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  tfHour?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCube?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  stations?: Prisma.StationUpdateManyWithoutOrganizationNestedInput
+  managers?: Prisma.UserOrganizationUpdateManyWithoutOrganizationNestedInput
+  workingHours?: Prisma.OrganizationWorkingHoursUpdateManyWithoutOrganizationNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutSessionsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  uuid?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  province?: Prisma.StringFieldUpdateOperationsInput | string
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerPhones?: Prisma.OrganizationUpdatemanagerPhonesInput | string[]
+  gallery?: Prisma.OrganizationUpdategalleryInput | string[]
+  indexImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  tfHour?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCube?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  stations?: Prisma.StationUncheckedUpdateManyWithoutOrganizationNestedInput
+  managers?: Prisma.UserOrganizationUncheckedUpdateManyWithoutOrganizationNestedInput
+  workingHours?: Prisma.OrganizationWorkingHoursUncheckedUpdateManyWithoutOrganizationNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 
@@ -1272,6 +1431,7 @@ export type OrganizationCountOutputType = {
   managers: number
   workingHours: number
   reservations: number
+  sessions: number
 }
 
 export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1279,6 +1439,7 @@ export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Exte
   managers?: boolean | OrganizationCountOutputTypeCountManagersArgs
   workingHours?: boolean | OrganizationCountOutputTypeCountWorkingHoursArgs
   reservations?: boolean | OrganizationCountOutputTypeCountReservationsArgs
+  sessions?: boolean | OrganizationCountOutputTypeCountSessionsArgs
 }
 
 /**
@@ -1319,6 +1480,13 @@ export type OrganizationCountOutputTypeCountReservationsArgs<ExtArgs extends run
   where?: Prisma.ReservationWhereInput
 }
 
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SessionWhereInput
+}
+
 
 export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1345,6 +1513,7 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   managers?: boolean | Prisma.Organization$managersArgs<ExtArgs>
   workingHours?: boolean | Prisma.Organization$workingHoursArgs<ExtArgs>
   reservations?: boolean | Prisma.Organization$reservationsArgs<ExtArgs>
+  sessions?: boolean | Prisma.Organization$sessionsArgs<ExtArgs>
   _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["organization"]>
 
@@ -1423,6 +1592,7 @@ export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.Interna
   managers?: boolean | Prisma.Organization$managersArgs<ExtArgs>
   workingHours?: boolean | Prisma.Organization$workingHoursArgs<ExtArgs>
   reservations?: boolean | Prisma.Organization$reservationsArgs<ExtArgs>
+  sessions?: boolean | Prisma.Organization$sessionsArgs<ExtArgs>
   _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type OrganizationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1435,6 +1605,7 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     managers: Prisma.$UserOrganizationPayload<ExtArgs>[]
     workingHours: Prisma.$OrganizationWorkingHoursPayload<ExtArgs>[]
     reservations: Prisma.$ReservationPayload<ExtArgs>[]
+    sessions: Prisma.$SessionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1855,6 +2026,7 @@ export interface Prisma__OrganizationClient<T, Null = never, ExtArgs extends run
   managers<T extends Prisma.Organization$managersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$managersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserOrganizationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   workingHours<T extends Prisma.Organization$workingHoursArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$workingHoursArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrganizationWorkingHoursPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reservations<T extends Prisma.Organization$reservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$reservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sessions<T extends Prisma.Organization$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2385,6 +2557,30 @@ export type Organization$reservationsArgs<ExtArgs extends runtime.Types.Extensio
   take?: number
   skip?: number
   distinct?: Prisma.ReservationScalarFieldEnum | Prisma.ReservationScalarFieldEnum[]
+}
+
+/**
+ * Organization.sessions
+ */
+export type Organization$sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Session
+   */
+  select?: Prisma.SessionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Session
+   */
+  omit?: Prisma.SessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SessionInclude<ExtArgs> | null
+  where?: Prisma.SessionWhereInput
+  orderBy?: Prisma.SessionOrderByWithRelationInput | Prisma.SessionOrderByWithRelationInput[]
+  cursor?: Prisma.SessionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SessionScalarFieldEnum | Prisma.SessionScalarFieldEnum[]
 }
 
 /**

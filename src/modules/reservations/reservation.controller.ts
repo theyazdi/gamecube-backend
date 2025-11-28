@@ -10,6 +10,8 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -17,6 +19,8 @@ import {
   ApiResponse,
   ApiParam,
   ApiQuery,
+  ApiBearerAuth,
+  ApiBody,
 } from '@nestjs/swagger';
 import { ReservationService } from './reservation.service';
 import {
@@ -27,11 +31,14 @@ import {
   CheckAvailabilityDto,
   SearchAvailableStationsDto,
 } from './dto';
+import { CreateSessionDto, CreateSessionResponseDto } from './dto/create-session.dto';
+import { JwtAuthGuard, RolesGuard, Roles, UserRole } from '../../shared';
+import { AuthenticatedRequest } from '../../shared/interfaces/authenticated-request.interface';
 
 @ApiTags('Reservations')
 @Controller('reservations')
 export class ReservationController {
-  constructor(private readonly reservationService: ReservationService) {}
+  constructor(private readonly reservationService: ReservationService) { }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -434,6 +441,117 @@ List of available stations for the specified gaming cafe in the specified time r
   })
   searchAvailableStations(@Body() dto: SearchAvailableStationsDto) {
     return this.reservationService.searchAvailableStations(dto);
+  }
+
+  @Post('preview-session')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.USER, UserRole.ORGANIZATION_MANAGER, UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Preview session details before creating (validation + pricing)',
+    description: `Validates session request and returns pricing information WITHOUT creating session or invoice.
+
+**Purpose:**
+- Show user the total price before they confirm
+- Validate that the time slot is available
+- Check all business rules without side effects
+
+**Process:**
+1. Validates station availability and time slot
+2. Calculates pricing (base price + 9% tax)
+3. Returns preview data for user confirmation
+4. Does NOT create session or invoice
+
+**Next Step:**
+After user confirms, call POST /create-session with same data`,
+  })
+  @ApiBody({ type: CreateSessionDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Session preview data (pricing and validation)',
+    schema: {
+      type: 'object',
+      properties: {
+        isAvailable: { type: 'boolean' },
+        stationTitle: { type: 'string' },
+        organizationName: { type: 'string' },
+        date: { type: 'string' },
+        startTime: { type: 'string' },
+        endTime: { type: 'string' },
+        duration: { type: 'number' },
+        playersCount: { type: 'number' },
+        priceBeforeTax: { type: 'number' },
+        tax: { type: 'number' },
+        totalPrice: { type: 'number' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid input: bad time format, time in past, duration too long, or player count exceeds capacity',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Station not found or inactive',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Time slot not available',
+  })
+  async previewSession(@Body() dto: CreateSessionDto) {
+    return this.reservationService.previewSession(dto);
+  }
+
+  @Post('create-session')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.USER, UserRole.ORGANIZATION_MANAGER, UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Create a new gaming session with invoice',
+    description: `Creates a new gaming session with pending status and generates an invoice.
+
+**Concurrency Protection:**
+- Uses database-level row locking (SELECT FOR UPDATE) to prevent race conditions
+- Multiple users cannot book the same time slot simultaneously
+- Transaction isolation level: SERIALIZABLE
+
+**Process:**
+1. Validates station availability and time slot
+2. Creates invoice content with session details
+3. Generates invoice with 10-minute due date
+4. Creates session with 10-minute expiration
+5. Returns session and invoice details for payment
+
+**Expiration:**
+- Session expires 10 minutes after creation
+- Invoice due in 10 minutes (same as session)
+- Expired sessions will be automatically revoked and invoice soft-deleted`,
+  })
+  @ApiBody({ type: CreateSessionDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Session and invoice created successfully',
+    type: CreateSessionResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid input: bad time format, time in past, duration too long, player count exceeds capacity, or no pricing available',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Station not found or inactive',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Time slot conflict: already reserved or being processed by another user',
+  })
+  async createSession(
+    @Body() dto: CreateSessionDto,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<CreateSessionResponseDto> {
+    return this.reservationService.createSession(dto, req.user.id);
   }
 }
 

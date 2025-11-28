@@ -24,7 +24,6 @@ model User {
   managedOrganizations UserOrganization[]
   reservations         Reservation[]
 
-  @@index([phone]) // Additional index for faster phone lookups
   @@map("users")
 }
 
@@ -84,13 +83,9 @@ model Organization {
   managers     UserOrganization[]
   workingHours OrganizationWorkingHours[]
   reservations Reservation[]
+  sessions     Session[]
 
-  @@index([uuid])
-  @@index([username])
-  @@index([province])
-  @@index([city])
-  @@index([latitude, longitude])
-  @@index([province, city, latitude, longitude]) // For location-based filtering
+  @@index([province, city, latitude, longitude]) // For location-based filtering (covers province and city queries too)
   @@map("organizations")
 }
 
@@ -108,9 +103,7 @@ model OrganizationWorkingHours {
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@unique([organizationId, dayOfWeek])
-  @@index([organizationId])
-  @@index([dayOfWeek])
-  @@index([organizationId, dayOfWeek])
+  @@index([dayOfWeek]) // For querying all organizations by specific day
   @@index([isClosed, is24Hours])
   @@map("organization_working_hours")
 }
@@ -174,6 +167,7 @@ model Station {
   stationGames StationGame[]
   pricings     StationPricing[]
   reservations Reservation[]
+  sessions     Session[]
 
   @@index([organizationId])
   @@index([consoleId])
@@ -196,9 +190,7 @@ model StationGame {
   game    Game    @relation(fields: [gameId], references: [id], onDelete: Cascade)
 
   @@unique([stationId, gameId])
-  @@index([stationId])
-  @@index([gameId])
-  @@index([gameId, stationId])
+  @@index([gameId]) // For reverse lookup: which stations have this game
   @@map("station_games")
 }
 
@@ -213,9 +205,7 @@ model StationPricing {
   station Station @relation(fields: [stationId], references: [id], onDelete: Cascade)
 
   @@unique([stationId, playerCount])
-  @@index([stationId])
-  @@index([playerCount])
-  @@index([stationId, playerCount])
+  @@index([playerCount]) // For global price comparison queries
   @@map("station_pricings")
 }
 
@@ -230,9 +220,7 @@ model UserOrganization {
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@unique([userId, organizationId])
-  @@index([userId])
-  @@index([organizationId])
-  @@index([userId, organizationId])
+  @@index([organizationId]) // For reverse lookup: which users manage this organization
   @@map("user_organizations")
 }
 
@@ -251,7 +239,7 @@ model Reservation {
   isBlockedByOrg Boolean  @default(false) // Is blocked by gaming cafe?
   startTime      DateTime // Reservation start time
   endTime        DateTime // Reservation end time
-  reservedDate   DateTime // Reservation date (without time) - for faster queries
+  reservedDate   DateTime @db.Date // Reservation date (without time) - for faster queries
   notes          String? // Additional notes
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -261,23 +249,95 @@ model Reservation {
   station      Station      @relation(fields: [stationId], references: [id], onDelete: Cascade)
   console      Console      @relation(fields: [consoleId], references: [id], onDelete: Restrict)
 
-  // Optimized indexes for different queries
-  @@index([uuid])
-  @@index([userId])
-  @@index([organizationId])
-  @@index([stationId])
-  @@index([consoleId])
-  @@index([reservedDate]) // For date-based search
-  @@index([startTime, endTime]) // For checking time overlap
-  @@index([stationId, reservedDate]) // For batch query of reservations
-
-  // Composite indexes for complex queries
-  @@index([organizationId, reservedDate, startTime]) // Search reservations for a gaming cafe in one day
-  @@index([stationId, reservedDate, startTime, endTime]) // Check station availability - MOST IMPORTANT
-  @@index([consoleId, reservedDate, startTime]) // Search by console type
-  @@index([reservedDate, startTime, endTime, isPaid, isAccepted]) // Active reservations
-  @@index([organizationId, isAccepted, isPaid]) // Manage pending reservations
+  // Optimized composite indexes for complex queries
+  @@index([stationId, reservedDate, startTime, endTime]) // Check station availability - MOST CRITICAL
+  @@index([organizationId, reservedDate, isPaid, isAccepted]) // Organization's daily reservations with status
   @@index([userId, reservedDate]) // User reservation history
+  @@index([reservedDate, isPaid, isAccepted]) // Active reservations globally
 
   @@map("reservations")
+}
+
+model Invoice {
+  id          Int      @id @default(autoincrement())
+  uuid        String   @unique @default(uuid())
+  userId      Int
+  sessionId   Int
+  price       BigInt // Max: 1000000000
+  priceBefore BigInt? // Max: 1000000000
+  tax         BigInt // Max: 1000000000
+  taxBefore   BigInt? // Max: 1000000000
+  contentId   Int      @unique
+  status      String   @default("not paid")
+  paymentId   Int?
+  dueDate     DateTime // 15 minutes after create date
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  content InvoiceContent @relation(fields: [contentId], references: [id], onDelete: Restrict)
+  session Session?
+
+  @@index([userId, status]) // User's invoices by status
+  @@index([status, dueDate]) // For processing overdue invoices
+  @@index([paymentId]) // For payment gateway callback lookup
+  @@map("invoices")
+}
+
+model InvoiceContent {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  invoice Invoice?
+
+  @@map("invoice_contents")
+}
+
+model Session {
+  id               Int      @id @default(autoincrement())
+  uuid             String   @unique @default(uuid())
+  organizationId   Int
+  stationId        Int
+  date             DateTime @db.Date // Only date without time
+  shamsiDate       String   @db.VarChar(10) // Iranian Shamsi date "1403/09/07"
+  startTime        String   @db.VarChar(5) // "13:00"
+  endTime          String?  @db.VarChar(5) // "14:30" - nullable
+  startTimeMinutes Int      @db.SmallInt // 780 (13*60) - minutes from start of day (0-1439)
+  endTimeMinutes   Int?     @db.SmallInt // 870 (14*60 + 30) - nullable (0-1439)
+  duration         Int      @db.SmallInt // Duration in minutes: 90 (max ~546 = 9 hours)
+  playersCount     Int      @db.SmallInt // Number of players (1-10)
+  status           String   @db.VarChar(20) // reserved, inprogress, pending, finished, canceled, revoked
+  invoiceId        Int      @unique
+  expireAt         DateTime // 10 minutes after creation
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  station      Station      @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  invoice      Invoice      @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+
+  // Optimized indexes for availability queries
+  @@index([stationId, date, startTimeMinutes, endTimeMinutes]) // MOST CRITICAL - for checking station availability
+  @@index([organizationId, date, status]) // For organization's daily sessions
+  @@index([expireAt, status]) // For cleaning expired sessions with pending status
+  @@map("sessions")
+}
+
+/// System Settings - Global configuration for the application
+/// Currently used for tax settings, can be extended for other settings
+model SystemSettings {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique @db.VarChar(100) // e.g., "tax_enabled", "tax_rate", "tax_type"
+  value     String   @db.VarChar(255) // Value as string (can be parsed as needed)
+  dataType  String   @db.VarChar(20) // "boolean", "number", "string", "percentage"
+  category  String   @db.VarChar(50) // "tax", "payment", "general", etc.
+  label     String   @db.VarChar(255) // Human-readable label in Persian
+  description String? @db.Text // Optional description
+  isActive  Boolean  @default(true) // Can be used to soft-delete settings
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category, isActive])
+  @@map("system_settings")
 }

@@ -657,10 +657,11 @@ export class StationService {
       currentSlotTime.setMinutes(currentSlotTime.getMinutes() + 30);
     }
 
-    // 7. Get all reservations for this station on this date
+    // 7. Get all reservations AND sessions for this station on this date
     const reservedDate = new Date(gregorianDate);
     reservedDate.setHours(0, 0, 0, 0);
 
+    // Get reservations from old Reservation table
     const reservations = await this.prisma.reservation.findMany({
       where: {
         stationId: stationId,
@@ -669,6 +670,23 @@ export class StationService {
       select: {
         startTime: true,
         endTime: true,
+      },
+    });
+
+    // Get sessions from new Session table (pending, reserved, inprogress)
+    // Using optimized index: [stationId, date, startTimeMinutes, endTimeMinutes]
+    const sessions = await this.prisma.session.findMany({
+      where: {
+        stationId: stationId,
+        date: reservedDate,
+        status: {
+          in: ['pending', 'reserved', 'inprogress'], // Active sessions that block time slots
+        },
+      },
+      select: {
+        startTimeMinutes: true,
+        endTimeMinutes: true,
+        status: true,
       },
     });
 
@@ -681,8 +699,12 @@ export class StationService {
         slot.isAvailable = false;
       }
 
-      // Check if slot is reserved
-      const reservation = reservations.find((r) => {
+      // Calculate slot time in minutes for efficient comparison
+      const slotStartMinutes = slot.startTime.getHours() * 60 + slot.startTime.getMinutes();
+      const slotEndMinutes = slot.endTime.getHours() * 60 + slot.endTime.getMinutes();
+
+      // Check if slot overlaps with any old reservation
+      const hasReservation = reservations.some((r) => {
         return (
           (slot.startTime >= r.startTime && slot.startTime < r.endTime) ||
           (slot.endTime > r.startTime && slot.endTime <= r.endTime) ||
@@ -690,7 +712,17 @@ export class StationService {
         );
       });
 
-      if (reservation) {
+      // Check if slot overlaps with any active session (optimized integer comparison)
+      const hasSession = sessions.some((s) => {
+        if (!s.endTimeMinutes) return false;
+        return (
+          (slotStartMinutes >= s.startTimeMinutes && slotStartMinutes < s.endTimeMinutes) ||
+          (slotEndMinutes > s.startTimeMinutes && slotEndMinutes <= s.endTimeMinutes) ||
+          (slotStartMinutes <= s.startTimeMinutes && slotEndMinutes >= s.endTimeMinutes)
+        );
+      });
+
+      if (hasReservation || hasSession) {
         slot.isReserved = true;
         slot.isAvailable = false;
       }

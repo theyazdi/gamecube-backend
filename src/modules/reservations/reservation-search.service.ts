@@ -83,19 +83,20 @@ export class ReservationSearchService {
           s.status,
           c.id as console_id,
           c.name as console_name,
-          c.category as console_category
+          c.category as console_category,
+          -- Mark if station matches console filter (for availability check)
+          CASE WHEN ${consoleId ? Prisma.sql`s."consoleId" = ${consoleId}` : Prisma.sql`true`} THEN true ELSE false END as matches_console_filter
         FROM stations s
         INNER JOIN nearby_orgs no ON s."organizationId" = no.id
         INNER JOIN consoles c ON s."consoleId" = c.id
         WHERE s."isActive" = true
           AND s."isAccepted" = true
           AND s."deletedAt" IS NULL
-          ${consoleId ? Prisma.sql`AND s."consoleId" = ${consoleId}` : Prisma.empty}
           ${playerCount ? Prisma.sql`AND s.capacity >= ${playerCount}` : Prisma.empty}
           ${gameId ? Prisma.sql`AND EXISTS (
-            SELECT 1 
-            FROM station_games sg 
-            WHERE sg."stationId" = s.id 
+            SELECT 1
+            FROM station_games sg
+            WHERE sg."stationId" = s.id
             AND sg."gameId" = ${gameId}
           )` : Prisma.empty}
       ),
@@ -169,6 +170,7 @@ export class ReservationSearchService {
               'consoleCategory', os.console_category,
               'capacity', os.capacity,
               'status', os.status,
+              'matchesConsoleFilter', os.matches_console_filter,
               'pricings', COALESCE(sp.pricings, '[]'::json),
               'games', COALESCE(sg.games, '[]'::json),
               'reservations', COALESCE(sr.reservations, '[]'::json)

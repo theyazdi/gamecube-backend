@@ -59,7 +59,11 @@ export const ModelName = {
   StationGame: 'StationGame',
   StationPricing: 'StationPricing',
   UserOrganization: 'UserOrganization',
-  Reservation: 'Reservation'
+  Reservation: 'Reservation',
+  Invoice: 'Invoice',
+  InvoiceContent: 'InvoiceContent',
+  Session: 'Session',
+  SystemSettings: 'SystemSettings'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -266,6 +270,75 @@ export const ReservationScalarFieldEnum = {
 } as const
 
 export type ReservationScalarFieldEnum = (typeof ReservationScalarFieldEnum)[keyof typeof ReservationScalarFieldEnum]
+
+
+export const InvoiceScalarFieldEnum = {
+  id: 'id',
+  uuid: 'uuid',
+  userId: 'userId',
+  sessionId: 'sessionId',
+  price: 'price',
+  priceBefore: 'priceBefore',
+  tax: 'tax',
+  taxBefore: 'taxBefore',
+  contentId: 'contentId',
+  status: 'status',
+  paymentId: 'paymentId',
+  dueDate: 'dueDate',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type InvoiceScalarFieldEnum = (typeof InvoiceScalarFieldEnum)[keyof typeof InvoiceScalarFieldEnum]
+
+
+export const InvoiceContentScalarFieldEnum = {
+  id: 'id',
+  content: 'content',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type InvoiceContentScalarFieldEnum = (typeof InvoiceContentScalarFieldEnum)[keyof typeof InvoiceContentScalarFieldEnum]
+
+
+export const SessionScalarFieldEnum = {
+  id: 'id',
+  uuid: 'uuid',
+  organizationId: 'organizationId',
+  stationId: 'stationId',
+  date: 'date',
+  shamsiDate: 'shamsiDate',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  startTimeMinutes: 'startTimeMinutes',
+  endTimeMinutes: 'endTimeMinutes',
+  duration: 'duration',
+  playersCount: 'playersCount',
+  status: 'status',
+  invoiceId: 'invoiceId',
+  expireAt: 'expireAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
+
+
+export const SystemSettingsScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  value: 'value',
+  dataType: 'dataType',
+  category: 'category',
+  label: 'label',
+  description: 'description',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SystemSettingsScalarFieldEnum = (typeof SystemSettingsScalarFieldEnum)[keyof typeof SystemSettingsScalarFieldEnum]
 
 
 export const SortOrder = {

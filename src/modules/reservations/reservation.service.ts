@@ -28,12 +28,14 @@ import {
 import { Prisma } from '../../generated/client';
 import { Logger } from '../../shared/utils/logger.util';
 import { ReservationSearchService } from './reservation-search.service';
+import { SettingsService } from '../general/settings.service';
 
 @Injectable()
 export class ReservationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly searchService: ReservationSearchService,
+    private readonly settingsService: SettingsService,
   ) {}
 
   /**
@@ -793,7 +795,10 @@ export class ReservationService {
         const stationsWithSlots = stations.map((station: any) => {
           let availableSlots: any[] = [];
 
-          if (reservedDate) {
+          // Only check availability for stations that match the console filter
+          const shouldCheckAvailability = station.matchesConsoleFilter !== false;
+
+          if (reservedDate && shouldCheckAvailability) {
             // Parse reservations from JSON
             const reservations = Array.isArray(station.reservations) ? station.reservations : [];
 
@@ -862,9 +867,11 @@ export class ReservationService {
             id: station.id,
             title: station.title,
             consoleId: station.consoleId,
+            consoleName: station.consoleName,
             capacity: station.capacity,
             pricings: Array.isArray(station.pricings) ? station.pricings : [],
             availableSlots,
+            matchesConsoleFilter: shouldCheckAvailability,
           };
         }).filter((s: any) => s !== null);
 
@@ -930,7 +937,7 @@ export class ReservationService {
           todayHours = { startTime: '00:00', endTime: '24:00', is24Hours: true, isClosed: false };
         }
 
-        // Extract consoles
+        // Extract all unique consoles from all stations (not just filtered ones)
         const consoleMap = new Map();
         stations.forEach((s: any) => {
           if (s.consoleId && s.consoleName) {
@@ -941,6 +948,17 @@ export class ReservationService {
 
         // Convert distance to meters
         const distanceInMeters = Math.round(org.distance * 1000);
+
+        // Filter stations: if consoleId filter is applied, only show matching stations
+        // Otherwise show all stations
+        const filteredStations = query.consoleId
+          ? stationsWithSlots.filter((s: any) => s.matchesConsoleFilter === true)
+          : stationsWithSlots;
+
+        // If no stations after filtering, don't show this organization
+        if (filteredStations.length === 0) {
+          return null;
+        }
 
         return {
           id: org.id,
@@ -955,7 +973,15 @@ export class ReservationService {
           workingHours: { today: todayHours, summary },
           workingDays,
           consoles: uniqueConsoles,
-          stations: stationsWithSlots,
+          stations: filteredStations.map((s: any) => ({
+            id: s.id,
+            title: s.title,
+            consoleId: s.consoleId,
+            consoleName: s.consoleName,
+            capacity: s.capacity,
+            pricings: s.pricings,
+            availableSlots: s.availableSlots,
+          })),
         };
       }),
     );
@@ -1729,6 +1755,416 @@ export class ReservationService {
         },
       },
     };
+  }
+
+  /**
+   * Create a new session with concurrent booking protection
+   * Uses Prisma transaction with SELECT FOR UPDATE to prevent race conditions
+   */
+  /**
+   * Preview session before creating - validation + pricing calculation
+   * Does NOT create session or invoice
+   */
+  async previewSession(dto: any) {
+    // Parse and validate time
+    if (!isValidTimeFormat(dto.startTime) || !isValidTimeFormat(dto.endTime)) {
+      throw new BadRequestException('Invalid time format. Use HH:mm format (e.g., "14:00")');
+    }
+
+    if (!isValidJalaliDateFormat(dto.date)) {
+      throw new BadRequestException('Invalid date format. Use YYYY/MM/DD format');
+    }
+
+    // Convert Jalali date to Gregorian
+    const gregorianDate = jalaliToGregorian(dto.date);
+    gregorianDate.setHours(0, 0, 0, 0);
+
+    // Convert time strings to minutes
+    const [startHour, startMinute] = dto.startTime.split(':').map(Number);
+    const [endHour, endMinute] = dto.endTime.split(':').map(Number);
+    const startTimeMinutes = startHour * 60 + startMinute;
+    const endTimeMinutes = endHour * 60 + endMinute;
+
+    // Calculate duration
+    const duration = endTimeMinutes - startTimeMinutes;
+
+    if (duration <= 0) {
+      throw new BadRequestException('End time must be after start time');
+    }
+
+    if (duration > 540) { // max 9 hours
+      throw new BadRequestException('Maximum session duration is 9 hours');
+    }
+
+    // Check if time is in the past
+    const now = new Date();
+    const sessionStartDateTime = new Date(gregorianDate);
+    sessionStartDateTime.setHours(startHour, startMinute, 0, 0);
+
+    if (sessionStartDateTime < now) {
+      throw new BadRequestException('Cannot create session for past time');
+    }
+
+    // 1. Get station with pricing
+    const station = await this.prisma.station.findFirst({
+      where: {
+        id: dto.stationId,
+        isActive: true,
+        isAccepted: true,
+        deletedAt: null,
+      },
+      include: {
+        organization: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        pricings: {
+          where: { playerCount: dto.playersCount },
+          select: { price: true },
+        },
+      },
+    });
+
+    if (!station) {
+      throw new NotFoundException('Station not found or inactive');
+    }
+
+    if (dto.playersCount > station.capacity) {
+      throw new BadRequestException(
+        `Number of players (${dto.playersCount}) exceeds station capacity (${station.capacity})`
+      );
+    }
+
+    if (!station.pricings || station.pricings.length === 0) {
+      throw new BadRequestException(
+        `No pricing found for ${dto.playersCount} players`
+      );
+    }
+
+    // 2. Check availability (without locking)
+    const conflictingSessions = await this.prisma.$queryRaw<Array<{ count: bigint }>>`
+      SELECT COUNT(*) as count
+      FROM sessions
+      WHERE station_id = ${dto.stationId}
+        AND date = ${gregorianDate}
+        AND status IN ('pending', 'reserved', 'inprogress')
+        AND (
+          (start_time_minutes < ${endTimeMinutes} AND end_time_minutes > ${startTimeMinutes})
+        )
+    `;
+
+    const isAvailable = conflictingSessions[0].count === BigInt(0);
+
+    if (!isAvailable) {
+      throw new ConflictException(
+        'This time slot is not available'
+      );
+    }
+
+    // Also check old Reservation table
+    const startDateTime = new Date(gregorianDate);
+    startDateTime.setHours(startHour, startMinute, 0, 0);
+    const endDateTime = new Date(gregorianDate);
+    endDateTime.setHours(endHour, endMinute, 0, 0);
+
+    const conflictingReservations = await this.prisma.reservation.count({
+      where: {
+        stationId: dto.stationId,
+        reservedDate: gregorianDate,
+        OR: [
+          {
+            AND: [
+              { startTime: { lte: startDateTime } },
+              { endTime: { gt: startDateTime } },
+            ],
+          },
+          {
+            AND: [
+              { startTime: { lt: endDateTime } },
+              { endTime: { gte: endDateTime } },
+            ],
+          },
+          {
+            AND: [
+              { startTime: { gte: startDateTime } },
+              { endTime: { lte: endDateTime } },
+            ],
+          },
+        ],
+      },
+    });
+
+    if (conflictingReservations > 0) {
+      throw new ConflictException(
+        'This time slot conflicts with existing reservations'
+      );
+    }
+
+    // 3. Calculate pricing with dynamic tax
+    const basePrice = station.pricings[0].price;
+    const hourlyRate = basePrice / 60; // price per minute
+    const totalPriceBeforeTax = Math.round(hourlyRate * duration);
+
+    // Get tax from settings service
+    const { taxAmount, totalAmount } = await this.settingsService.calculateTax(totalPriceBeforeTax);
+
+    // 4. Return preview data
+    return {
+      isAvailable: true,
+      stationId: station.id,
+      stationTitle: station.title,
+      organizationId: station.organization.id,
+      organizationName: station.organization.name,
+      date: dto.date,
+      startTime: dto.startTime,
+      endTime: dto.endTime,
+      duration: duration,
+      playersCount: dto.playersCount,
+      priceBeforeTax: totalPriceBeforeTax,
+      tax: taxAmount,
+      totalPrice: totalAmount,
+    };
+  }
+
+  async createSession(dto: any, userId: number) {
+    // Parse and validate time
+    if (!isValidTimeFormat(dto.startTime) || !isValidTimeFormat(dto.endTime)) {
+      throw new BadRequestException('Invalid time format. Use HH:mm format (e.g., "14:00")');
+    }
+
+    if (!isValidJalaliDateFormat(dto.date)) {
+      throw new BadRequestException('Invalid date format. Use YYYY/MM/DD format');
+    }
+
+    // Convert Jalali date to Gregorian
+    const gregorianDate = jalaliToGregorian(dto.date);
+    gregorianDate.setHours(0, 0, 0, 0);
+
+    // Convert time strings to minutes
+    const [startHour, startMinute] = dto.startTime.split(':').map(Number);
+    const [endHour, endMinute] = dto.endTime.split(':').map(Number);
+    const startTimeMinutes = startHour * 60 + startMinute;
+    const endTimeMinutes = endHour * 60 + endMinute;
+
+    // Calculate duration
+    const duration = endTimeMinutes - startTimeMinutes;
+
+    if (duration <= 0) {
+      throw new BadRequestException('End time must be after start time');
+    }
+
+    if (duration > 540) { // max 9 hours
+      throw new BadRequestException('Maximum session duration is 9 hours');
+    }
+
+    // Check if time is in the past
+    const now = new Date();
+    const sessionStartDateTime = new Date(gregorianDate);
+    sessionStartDateTime.setHours(startHour, startMinute, 0, 0);
+
+    if (sessionStartDateTime < now) {
+      throw new BadRequestException('Cannot create session for past time');
+    }
+
+    // Use Prisma transaction with row-level locking for concurrency control
+    return await this.prisma.$transaction(async (tx) => {
+      // 1. Lock and verify station exists
+      const station = await tx.station.findFirst({
+        where: {
+          id: dto.stationId,
+          isActive: true,
+          isAccepted: true,
+          deletedAt: null,
+        },
+        include: {
+          organization: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          pricings: {
+            where: { playerCount: dto.playersCount },
+            select: { price: true },
+          },
+        },
+      });
+
+      if (!station) {
+        throw new NotFoundException('Station not found or inactive');
+      }
+
+      if (dto.playersCount > station.capacity) {
+        throw new BadRequestException(
+          `Number of players (${dto.playersCount}) exceeds station capacity (${station.capacity})`
+        );
+      }
+
+      if (!station.pricings || station.pricings.length === 0) {
+        throw new BadRequestException(
+          `No pricing found for ${dto.playersCount} players`
+        );
+      }
+
+      // 2. Check for conflicts using optimized query with row-level lock
+      // This prevents race conditions between concurrent requests
+      const conflictingSessions = await tx.$queryRaw<Array<{ count: bigint }>>`
+        SELECT COUNT(*) as count
+        FROM sessions
+        WHERE station_id = ${dto.stationId}
+          AND date = ${gregorianDate}
+          AND status IN ('pending', 'reserved', 'inprogress')
+          AND (
+            (start_time_minutes < ${endTimeMinutes} AND end_time_minutes > ${startTimeMinutes})
+          )
+        FOR UPDATE
+      `;
+
+      if (conflictingSessions[0].count > 0) {
+        throw new ConflictException(
+          'This time slot is already reserved or being processed by another user'
+        );
+      }
+
+      // Also check old Reservation table
+      const startDateTime = new Date(gregorianDate);
+      startDateTime.setHours(startHour, startMinute, 0, 0);
+      const endDateTime = new Date(gregorianDate);
+      endDateTime.setHours(endHour, endMinute, 0, 0);
+
+      const conflictingReservations = await tx.reservation.count({
+        where: {
+          stationId: dto.stationId,
+          reservedDate: gregorianDate,
+          OR: [
+            {
+              AND: [
+                { startTime: { lte: startDateTime } },
+                { endTime: { gt: startDateTime } },
+              ],
+            },
+            {
+              AND: [
+                { startTime: { lt: endDateTime } },
+                { endTime: { gte: endDateTime } },
+              ],
+            },
+            {
+              AND: [
+                { startTime: { gte: startDateTime } },
+                { endTime: { lte: endDateTime } },
+              ],
+            },
+          ],
+        },
+      });
+
+      if (conflictingReservations > 0) {
+        throw new ConflictException(
+          'This time slot conflicts with existing reservations'
+        );
+      }
+
+      // 3. Calculate pricing with dynamic tax
+      const basePrice = station.pricings[0].price;
+      const hourlyRate = basePrice / 60; // price per minute
+      const totalPriceBeforeTax = Math.round(hourlyRate * duration);
+
+      // Get tax from settings service
+      const { taxAmount, totalAmount: totalPrice } = await this.settingsService.calculateTax(totalPriceBeforeTax);
+
+      // 4. Create invoice content
+      const daysOfWeek = ['شنبه', 'یک‌شنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'];
+      const dayOfWeek = daysOfWeek[(gregorianDate.getDay() + 1) % 7];
+      const durationHours = Math.floor(duration / 60);
+      const durationMinutes = duration % 60;
+      let durationText = '';
+      if (durationHours > 0) durationText += `${durationHours} ساعت`;
+      if (durationMinutes > 0) durationText += ` و ${durationMinutes} دقیقه`;
+
+      const invoiceContent = await tx.invoiceContent.create({
+        data: {
+          content: `رزرو گیم نت ${station.organization.name} - به مدت ${durationText} - روز ${dayOfWeek} - ${dto.date} - ساعت ${dto.startTime} الی ${dto.endTime}`,
+        },
+      });
+
+      // 5. Create invoice and session with same expiration (10 minutes)
+      const expireAt = new Date();
+      expireAt.setMinutes(expireAt.getMinutes() + 10);
+
+      const invoice = await tx.invoice.create({
+        data: {
+          userId: userId,
+          sessionId: 0, // Temporary, will be updated after session creation
+          price: BigInt(totalPrice),
+          priceBefore: BigInt(totalPriceBeforeTax),
+          tax: BigInt(taxAmount),
+          taxBefore: null,
+          contentId: invoiceContent.id,
+          status: 'not paid',
+          paymentId: null,
+          dueDate: expireAt, // Same as session expiry: 10 minutes
+        },
+      });
+
+      // 6. Create session
+
+      const session = await tx.session.create({
+        data: {
+          organizationId: station.organization.id,
+          stationId: dto.stationId,
+          date: gregorianDate,
+          shamsiDate: dto.date,
+          startTime: dto.startTime,
+          endTime: dto.endTime,
+          startTimeMinutes: startTimeMinutes,
+          endTimeMinutes: endTimeMinutes,
+          duration: duration,
+          playersCount: dto.playersCount,
+          status: 'pending',
+          invoiceId: invoice.id,
+          expireAt: expireAt,
+        },
+      });
+
+      // 7. Update invoice with sessionId
+      await tx.invoice.update({
+        where: { id: invoice.id },
+        data: { sessionId: session.id },
+      });
+
+      // 8. Return response
+      return {
+        sessionUuid: session.uuid,
+        invoiceUuid: invoice.uuid,
+        invoiceId: invoice.id,
+        totalPrice: invoice.price,
+        tax: invoice.tax,
+        priceBeforeTax: invoice.priceBefore || BigInt(0), // Always return a bigint value
+        expireAt: session.expireAt,
+        session: {
+          id: session.id,
+          uuid: session.uuid,
+          organizationId: session.organizationId,
+          organizationName: station.organization.name,
+          stationId: session.stationId,
+          stationTitle: station.title,
+          date: session.date,
+          shamsiDate: session.shamsiDate,
+          startTime: session.startTime,
+          endTime: session.endTime,
+          duration: session.duration,
+          playersCount: session.playersCount,
+          status: session.status,
+        },
+      };
+    }, {
+      maxWait: 5000, // Maximum time to wait for a transaction slot (5 seconds)
+      timeout: 10000, // Maximum time the transaction can run (10 seconds)
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable, // Highest isolation level
+    });
   }
 }
 
